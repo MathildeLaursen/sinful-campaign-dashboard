@@ -4,59 +4,73 @@ import plotly.express as px
 from streamlit_gsheets import GSheetsConnection
 import extra_streamlit_components as stx
 import datetime
+import time
 
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
 
 st.title("📧 Live Dashboard: Email Marketing")
 
-# --- LOGIN LOGIK MED COOKIES (HUSKER DIG I 24 TIMER) ---
+# --- LOGIN LOGIK (ROBUST VERSION) ---
 def check_password():
-    # Opret forbindelse til browserens cookies
-    cookie_manager = stx.CookieManager()
+    # Initialiser cookie manageren
+    cookie_manager = stx.CookieManager(key="cookie_manager")
     
-    # Hent værdien af vores login-cookie (hvis den findes)
-    # Vi bruger en unik nøgle 'sinful_auth' så den ikke blandes med andre apps
-    auth_cookie = cookie_manager.get(cookie="sinful_auth")
+    # Hent cookie værdi
+    cookie_val = cookie_manager.get(cookie="sinful_auth")
 
-    # Hvis cookien siger "true", er brugeren allerede logget ind
-    if auth_cookie == "true":
+    # 1. Tjek: Er vi allerede logget ind i denne session? (Hurtigst)
+    if st.session_state.get("authenticated", False):
         return True
 
-    # Hvis ikke logget ind, vis login formular
+    # 2. Tjek: Har brugeren en gyldig cookie fra sidst?
+    if cookie_val == "true":
+        st.session_state["authenticated"] = True
+        st.rerun() # Genstart for at opdatere siden med det samme
+        return True
+
+    # 3. Vis Login Formular
     st.markdown("### 🔒 Adgang påkrævet")
     
-    # Vi bruger st.form til at lave en rigtig "Log Ind" knap
     with st.form("login_form"):
         password_input = st.text_input("Indtast kodeord:", type="password")
-        # Dette laver knappen:
         submit_button = st.form_submit_button("Log Ind")
 
         if submit_button:
             if password_input == st.secrets["PASSWORD"]:
-                # Rigtigt kodeord: Sæt cookie til at udløbe om 1 dag (24 timer)
+                # A. Log brugeren ind med det samme i sessionen
+                st.session_state["authenticated"] = True
+                
+                # B. Sæt cookie til at huske brugeren i 24 timer
                 expires = datetime.datetime.now() + datetime.timedelta(days=1)
                 cookie_manager.set("sinful_auth", "true", expires_at=expires)
                 
-                # Genstart appen for at aktivere cookien
+                # C. VIGTIGT: Vent lidt så browseren når at gemme cookien
+                st.success("Logger ind...")
+                time.sleep(1) 
+                
+                # D. Genstart appen
                 st.rerun()
             else:
                 st.error("😕 Forkert kodeord")
     
-    # Stop koden her, hvis man ikke er logget ind
     return False
 
-# Kør login tjekket før vi viser resten
+# Stop koden her, hvis man ikke er logget ind
 if not check_password():
     st.stop()
 
-# --- HERUNDER ER DASHBOARDET (KUN SYNLIGT HVIS LOGGET IND) ---
+# --- HERUNDER ER DASHBOARDET (KUN SYNLIGT NÅR LOGGET IND) ---
 
-# Knap til at logge ud (sletter cookien)
-if st.sidebar.button("Log Ud"):
-    cookie_manager = stx.CookieManager()
-    cookie_manager.delete("sinful_auth")
-    st.rerun()
+# Log ud knap i menuen
+with st.sidebar:
+    st.write("Logget ind ✅")
+    if st.button("Log Ud"):
+        # Slet cookie og session state
+        cookie_manager = stx.CookieManager(key="logout_manager")
+        cookie_manager.delete("sinful_auth")
+        st.session_state["authenticated"] = False
+        st.rerun()
 
 @st.cache_data(ttl=600)
 def load_google_sheet_data():
