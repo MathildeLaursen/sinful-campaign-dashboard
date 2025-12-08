@@ -17,10 +17,10 @@ def check_password():
             st.session_state["password_correct"] = False
 
     if "password_correct" not in st.session_state:
-        st.text_input("🔒 Indtast kodeord:", type="password", on_change=password_entered, key="password")
+        st.text_input("🔒 Indtast kodeord for at se dashboardet:", type="password", on_change=password_entered, key="password")
         return False
     elif not st.session_state["password_correct"]:
-        st.text_input("🔒 Indtast kodeord:", type="password", on_change=password_entered, key="password")
+        st.text_input("🔒 Indtast kodeord for at se dashboardet:", type="password", on_change=password_entered, key="password")
         st.error("😕 Forkert kodeord")
         return False
     else:
@@ -29,34 +29,43 @@ def check_password():
 if not check_password():
     st.stop()
 
-# --- HOVEDPROGRAM (NU UDEN TRY/EXCEPT FOR AT SE FEJLEN) ---
+# --- DASHBOARD LOGIK ---
 
 st.title("📧 Live Dashboard: Email Marketing")
 
 @st.cache_data(ttl=600)
 def load_google_sheet_data():
     conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read(skiprows=1)
+    # Læs data
+    try:
+        df = conn.read(skiprows=1)
+    except Exception:
+        # Hvis den fejler her, er det oftest en netværksfejl eller rettigheder
+        return pd.DataFrame()
     
     # RENSNING
-    rename_map = {
-        df.columns[0]: 'Send Year',
-        df.columns[1]: 'Send Month',
-        df.columns[2]: 'Send Day',
-        df.columns[3]: 'Send Time',
-        df.columns[4]: 'Number',
-        df.columns[5]: 'Campaign Name',
-        df.columns[6]: 'Email Type',
-        df.columns[7]: 'Message',
-        df.columns[8]: 'Variant',
-        df.columns[9]: 'Total_Received',
-        df.columns[10]: 'Total_Opens_Raw',
-        df.columns[11]: 'Unique_Opens',
-        df.columns[12]: 'Total_Clicks_Raw',
-        df.columns[13]: 'Unique_Clicks',
-        df.columns[14]: 'Unsubscribed'
-    }
-    df = df.rename(columns=rename_map)
+    try:
+        rename_map = {
+            df.columns[0]: 'Send Year',
+            df.columns[1]: 'Send Month',
+            df.columns[2]: 'Send Day',
+            df.columns[3]: 'Send Time',
+            df.columns[4]: 'Number',
+            df.columns[5]: 'Campaign Name',
+            df.columns[6]: 'Email Type',
+            df.columns[7]: 'Message',
+            df.columns[8]: 'Variant',
+            df.columns[9]: 'Total_Received',
+            df.columns[10]: 'Total_Opens_Raw',
+            df.columns[11]: 'Unique_Opens',
+            df.columns[12]: 'Total_Clicks_Raw',
+            df.columns[13]: 'Unique_Clicks',
+            df.columns[14]: 'Unsubscribed'
+        }
+        df = df.rename(columns=rename_map)
+    except Exception as e:
+        st.error(f"Kunne ikke genkende kolonnerne i arket. Har strukturen ændret sig? Fejl: {e}")
+        return pd.DataFrame()
 
     df['Date'] = pd.to_datetime(
         df['Send Year'].astype(str) + '-' + 
@@ -77,48 +86,63 @@ def load_google_sheet_data():
     
     return df
 
-# KØR KODEN DIREKTE
-df = load_google_sheet_data()
+try:
+    with st.spinner('Henter nyeste data fra Google...'):
+        df = load_google_sheet_data()
+    
+    if df.empty:
+        st.error("Kunne ikke hente data. Tjek at Google Sheet linket er korrekt i Secrets.")
+        st.stop()
 
-if df.empty:
-    st.warning("Ingen data fundet.")
-    st.stop()
+    st.sidebar.header("🔍 Filtre")
+    min_date = df['Date'].min()
+    max_date = df['Date'].max()
+    start_date, end_date = st.sidebar.date_input("Vælg periode", [min_date, max_date], min_value=min_date, max_value=max_date)
+    
+    all_campaigns = sorted(df['Campaign Name'].astype(str).unique())
+    campaign_filter = st.sidebar.multiselect("Kampagne Navn", options=all_campaigns, default=all_campaigns)
 
-st.sidebar.header("🔍 Filtre")
-min_date = df['Date'].min()
-max_date = df['Date'].max()
-start_date, end_date = st.sidebar.date_input("Vælg periode", [min_date, max_date], min_value=min_date, max_value=max_date)
+    mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date)) & (df['Campaign Name'].astype(str).isin(campaign_filter))
+    filtered_df = df.loc[mask]
 
-all_campaigns = sorted(df['Campaign Name'].astype(str).unique())
-campaign_filter = st.sidebar.multiselect("Kampagne Navn", options=all_campaigns, default=all_campaigns)
+    # KPI'er
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    kpi1.metric("Emails Sendt", f"{filtered_df['Total_Received'].sum():,.0f}")
+    kpi2.metric("Unikke Opens", f"{filtered_df['Unique_Opens'].sum():,.0f}")
+    kpi3.metric("Gns. Open Rate", f"{filtered_df['Open Rate %'].mean():.1f}%")
+    kpi4.metric("Gns. Click Rate", f"{filtered_df['Click Rate %'].mean():.2f}%")
+    
+    st.divider()
 
-mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date)) & (df['Campaign Name'].astype(str).isin(campaign_filter))
-filtered_df = df.loc[mask]
+    # Grafer
+    col_graph1, col_graph2 = st.columns(2)
+    with col_graph1:
+        st.subheader("📈 Open Rate Udvikling")
+        if not filtered_df.empty:
+            fig_line = px.line(filtered_df.sort_values('Date'), x='Date', y='Open Rate %', hover_data=['Message'])
+            fig_line.update_traces(line_color='#E74C3C')
+            st.plotly_chart(fig_line, use_container_width=True)
 
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-kpi1.metric("Emails Sendt", f"{filtered_df['Total_Received'].sum():,.0f}")
-kpi2.metric("Unikke Opens", f"{filtered_df['Unique_Opens'].sum():,.0f}")
-kpi3.metric("Gns. Open Rate", f"{filtered_df['Open Rate %'].mean():.1f}%")
-kpi4.metric("Gns. Click Rate", f"{filtered_df['Click Rate %'].mean():.2f}%")
+    with col_graph2:
+        st.subheader("🎯 Klik vs. Opens")
+        if not filtered_df.empty:
+            fig_scatter = px.scatter(filtered_df, x='Open Rate %', y='Click Rate %', size='Total_Received', color='Campaign Name', hover_name='Message')
+            st.plotly_chart(fig_scatter, use_container_width=True)
 
-st.divider()
+    # Tabel
+    st.subheader("🏆 Top Performers (Kliks)")
+    if not filtered_df.empty:
+        top_performers = filtered_df.sort_values(by='Unique_Clicks', ascending=False).head(10)
+        st.dataframe(top_performers[['Date', 'Campaign Name', 'Message', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %']].style.format({
+            'Unique_Opens': '{:,.0f}',
+            'Unique_Clicks': '{:,.0f}',
+            'Open Rate %': '{:.1f}%',
+            'Click Rate %': '{:.2f}%'
+        }), use_container_width=True)
+    
+    if st.button('🔄 Opdater Data'):
+        st.cache_data.clear()
+        st.rerun()
 
-col_graph1, col_graph2 = st.columns(2)
-with col_graph1:
-    st.subheader("📈 Open Rate Udvikling")
-    fig_line = px.line(filtered_df.sort_values('Date'), x='Date', y='Open Rate %', hover_data=['Message'])
-    fig_line.update_traces(line_color='#E74C3C')
-    st.plotly_chart(fig_line, use_container_width=True)
-
-with col_graph2:
-    st.subheader("🎯 Klik vs. Opens")
-    fig_scatter = px.scatter(filtered_df, x='Open Rate %', y='Click Rate %', size='Total_Received', color='Campaign Name', hover_name='Message')
-    st.plotly_chart(fig_scatter, use_container_width=True)
-
-st.subheader("🏆 Top Performers (Kliks)")
-top_performers = filtered_df.sort_values(by='Unique_Clicks', ascending=False).head(10)
-st.dataframe(top_performers[['Date', 'Campaign Name', 'Message', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %']], use_container_width=True)
-
-if st.button('🔄 Opdater Data'):
-    st.cache_data.clear()
-    st.rerun()
+except Exception as e:
+    st.error(f"Der opstod en uventet fejl: {e}")
