@@ -253,9 +253,9 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     # 3 kolonner til filtrene (kombinerede)
     f1, f2, f3 = st.columns(3)
     
-    sel_id_campaigns = f1.multiselect("Kampagne (ID - Navn)", all_id_campaigns, default=[])
-    sel_email_messages = f2.multiselect("Email - Message", all_email_messages, default=[])
-    sel_variants = f3.multiselect("Variant", all_variants, default=[])
+    sel_id_campaigns = f1.multiselect("Kampagne)", all_id_campaigns, default=[])
+    sel_email_messages = f2.multiselect("Email", all_email_messages, default=[])
+    sel_variants = f3.multiselect("A/B", all_variants, default=[])
 
 
 # --- DATA FILTRERING ---
@@ -355,3 +355,4 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
