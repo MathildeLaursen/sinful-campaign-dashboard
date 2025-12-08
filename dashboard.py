@@ -7,8 +7,11 @@ import datetime
 import time
 
 # --- SIDE OPSÆTNING ---
-st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
-
+st.set_page_config(
+    page_title="Sinful KPI Dashboard", 
+    layout="wide", 
+    initial_sidebar_state="collapsed"
+)
 # --- CSS HACK: DESIGN TILPASNINGER ---
 st.markdown("""
     <style>
@@ -20,8 +23,8 @@ st.markdown("""
         
         /* 2. Gør sidebaren smallere */
         section[data-testid="stSidebar"] {
-            width: 120px !important; /* Din ønskede bredde */
-            min-width: 120px !important; /* VIGTIGT: Tillad den at blive mindre end standard */
+            width: 150px !important; /* Din ønskede bredde */
+            min-width: 150px !important; /* VIGTIGT: Tillad den at blive mindre end standard */
         }
     </style>
 """, unsafe_allow_html=True)
@@ -327,6 +330,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
