@@ -9,7 +9,7 @@ import time
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
 
-# --- CSS HACK: MINDRE AFSTAND I TOPPEN ---
+# --- CSS: MINDRE AFSTAND I TOPPEN ---
 st.markdown("""
     <style>
         .block-container {
@@ -59,7 +59,7 @@ if not check_password():
 
 # --- HERUNDER STARTER DASHBOARDET ---
 
-st.title("📧 Live Dashboard: Email Marketing")
+st.title("📧 Dashboard: Nyhedsbreve")
 
 # Log ud knap i menuen (sidebar er nu kun til log ud)
 with st.sidebar:
@@ -321,4 +321,5 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
