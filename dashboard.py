@@ -24,8 +24,8 @@ st.markdown("""
         
         /* 2. Gør sidebaren smallere (og håndter min-width) */
         section[data-testid="stSidebar"] {
-            width: 100px !important;
-            min-width: 100px !important;
+            width: 120px !important;
+            min-width: 120px !important;
         }
 
         /* 3. KOMPAKT OG CENTRERET KNAP */
@@ -357,6 +357,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
