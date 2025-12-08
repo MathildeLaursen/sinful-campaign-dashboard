@@ -70,7 +70,6 @@ st.title("Newsletter Dashboard 📧")
 
 # Log ud knap i menuen (sidebar er nu kun til log ud)
 with st.sidebar:
-    st.write("✅ Logget ind")
     if st.button("Log Ud"):
         cookie_manager = stx.CookieManager(key="logout_manager")
         cookie_manager.delete("sinful_auth")
@@ -328,6 +327,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
