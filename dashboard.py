@@ -194,7 +194,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     
     col_date1, col_date2 = st.columns([1, 3])
     with col_date1:
-        selected_range = st.selectbox("Vælg Datoer", date_options)
+        selected_range = st.selectbox(date_options)
 
     today = datetime.date.today()
     start_date = today
@@ -253,7 +253,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     # 3 kolonner til filtrene (kombinerede)
     f1, f2, f3 = st.columns(3)
     
-    sel_id_campaigns = f1.multiselect("Kampagne)", all_id_campaigns, default=[])
+    sel_id_campaigns = f1.multiselect("Kampagne", all_id_campaigns, default=[])
     sel_email_messages = f2.multiselect("Email", all_email_messages, default=[])
     sel_variants = f3.multiselect("A/B", all_variants, default=[])
 
@@ -355,4 +355,5 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
