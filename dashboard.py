@@ -28,16 +28,23 @@ st.markdown("""
             min-width: 100px !important;
         }
 
-        /* 3. Kompakt knap i sidebar (Fjern luft inde i og omkring) */
-        section[data-testid="stSidebar"] .stButton {
-            margin-top: 0px; /* Fjerner luft over knappen */
-        }
+        /* 3. KOMPAKT KNAP I SIDEBAR (Aggressiv styling) */
         
-        section[data-testid="stSidebar"] .stButton button {
-            height: auto !important;         /* Lad højden tilpasse sig teksten */
-            min-height: 0px !important;      /* Fjern Streamlits standard minimumshøjde */
-            padding-top: 1px !important;     /* Mindre luft i toppen inde i knappen */
-            padding-bottom: 1px !important;  /* Mindre luft i bunden inde i knappen */
+        /* Fjern luft rundt om knap-containeren */
+        [data-testid="stSidebar"] .stButton {
+            margin-bottom: 0px !important;
+            padding-bottom: 0px !important;
+        }
+
+        /* Styling af selve knappen */
+        [data-testid="stSidebar"] button {
+            min-height: 0px !important;      /* Tillad at den er lav */
+            height: auto !important;         /* Tilpas højde til tekst */
+            padding-top: 4px !important;     /* Lille luft i top */
+            padding-bottom: 4px !important;  /* Lille luft i bund */
+            line-height: 1.2 !important;     /* Saml linjerne lidt hvis den wrapper */
+            white-space: nowrap !important;  /* TVING teksten til at blive på én linje */
+            font-size: 14px !important;      /* Gør skriften lidt mindre, så den kan være der */
         }
     </style>
 """, unsafe_allow_html=True)
@@ -343,6 +350,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
