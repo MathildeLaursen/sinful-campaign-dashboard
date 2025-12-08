@@ -2,48 +2,70 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from streamlit_gsheets import GSheetsConnection
+import extra_streamlit_components as stx
+import datetime
 
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
 
-# --- SIKKERHED (KODEORD) ---
-def check_password():
-    """Returnerer True hvis brugeren har indtastet rigtigt kodeord."""
-    def password_entered():
-        if st.session_state["password"] == st.secrets["PASSWORD"]:
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-        else:
-            st.session_state["password_correct"] = False
+st.title("📧 Live Dashboard: Email Marketing")
 
-    if "password_correct" not in st.session_state:
-        st.text_input("🔒 Indtast kodeord for at se dashboardet:", type="password", on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("🔒 Indtast kodeord for at se dashboardet:", type="password", on_change=password_entered, key="password")
-        st.error("😕 Forkert kodeord")
-        return False
-    else:
+# --- LOGIN LOGIK MED COOKIES (HUSKER DIG I 24 TIMER) ---
+def check_password():
+    # Opret forbindelse til browserens cookies
+    cookie_manager = stx.CookieManager()
+    
+    # Hent værdien af vores login-cookie (hvis den findes)
+    # Vi bruger en unik nøgle 'sinful_auth' så den ikke blandes med andre apps
+    auth_cookie = cookie_manager.get(cookie="sinful_auth")
+
+    # Hvis cookien siger "true", er brugeren allerede logget ind
+    if auth_cookie == "true":
         return True
 
+    # Hvis ikke logget ind, vis login formular
+    st.markdown("### 🔒 Adgang påkrævet")
+    
+    # Vi bruger st.form til at lave en rigtig "Log Ind" knap
+    with st.form("login_form"):
+        password_input = st.text_input("Indtast kodeord:", type="password")
+        # Dette laver knappen:
+        submit_button = st.form_submit_button("Log Ind")
+
+        if submit_button:
+            if password_input == st.secrets["PASSWORD"]:
+                # Rigtigt kodeord: Sæt cookie til at udløbe om 1 dag (24 timer)
+                expires = datetime.datetime.now() + datetime.timedelta(days=1)
+                cookie_manager.set("sinful_auth", "true", expires_at=expires)
+                
+                # Genstart appen for at aktivere cookien
+                st.rerun()
+            else:
+                st.error("😕 Forkert kodeord")
+    
+    # Stop koden her, hvis man ikke er logget ind
+    return False
+
+# Kør login tjekket før vi viser resten
 if not check_password():
     st.stop()
 
-# --- DASHBOARD LOGIK ---
+# --- HERUNDER ER DASHBOARDET (KUN SYNLIGT HVIS LOGGET IND) ---
 
-st.title("📧 Live Dashboard: Email Marketing")
+# Knap til at logge ud (sletter cookien)
+if st.sidebar.button("Log Ud"):
+    cookie_manager = stx.CookieManager()
+    cookie_manager.delete("sinful_auth")
+    st.rerun()
 
 @st.cache_data(ttl=600)
 def load_google_sheet_data():
     conn = st.connection("gsheets", type=GSheetsConnection)
-    # Læs data
     try:
         df = conn.read(skiprows=1)
     except Exception:
-        # Hvis den fejler her, er det oftest en netværksfejl eller rettigheder
         return pd.DataFrame()
     
-    # RENSNING
     try:
         rename_map = {
             df.columns[0]: 'Send Year',
@@ -64,7 +86,7 @@ def load_google_sheet_data():
         }
         df = df.rename(columns=rename_map)
     except Exception as e:
-        st.error(f"Kunne ikke genkende kolonnerne i arket. Har strukturen ændret sig? Fejl: {e}")
+        st.error(f"Kunne ikke genkende kolonnerne. Fejl: {e}")
         return pd.DataFrame()
 
     df['Date'] = pd.to_datetime(
@@ -87,11 +109,11 @@ def load_google_sheet_data():
     return df
 
 try:
-    with st.spinner('Henter nyeste data fra Google...'):
+    with st.spinner('Henter data...'):
         df = load_google_sheet_data()
     
     if df.empty:
-        st.error("Kunne ikke hente data. Tjek at Google Sheet linket er korrekt i Secrets.")
+        st.error("Kunne ikke hente data. Tjek Secrets.")
         st.stop()
 
     st.sidebar.header("🔍 Filtre")
@@ -105,7 +127,6 @@ try:
     mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date)) & (df['Campaign Name'].astype(str).isin(campaign_filter))
     filtered_df = df.loc[mask]
 
-    # KPI'er
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     kpi1.metric("Emails Sendt", f"{filtered_df['Total_Received'].sum():,.0f}")
     kpi2.metric("Unikke Opens", f"{filtered_df['Unique_Opens'].sum():,.0f}")
@@ -114,7 +135,6 @@ try:
     
     st.divider()
 
-    # Grafer
     col_graph1, col_graph2 = st.columns(2)
     with col_graph1:
         st.subheader("📈 Open Rate Udvikling")
@@ -129,7 +149,6 @@ try:
             fig_scatter = px.scatter(filtered_df, x='Open Rate %', y='Click Rate %', size='Total_Received', color='Campaign Name', hover_name='Message')
             st.plotly_chart(fig_scatter, use_container_width=True)
 
-    # Tabel
     st.subheader("🏆 Top Performers (Kliks)")
     if not filtered_df.empty:
         top_performers = filtered_df.sort_values(by='Unique_Clicks', ascending=False).head(10)
@@ -145,4 +164,4 @@ try:
         st.rerun()
 
 except Exception as e:
-    st.error(f"Der opstod en uventet fejl: {e}")
+    st.error(f"Fejl: {e}")
