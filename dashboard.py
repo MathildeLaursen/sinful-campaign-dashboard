@@ -175,22 +175,22 @@ except Exception as e:
 with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     
     # Række 1: Datovælger
-    st.subheader("📅 Periode")
+    st.subheader("📅 Vælg Periode")
     date_options = [
-        "Denne måned til dato",
-        "Denne uge til dato",
-        "Sidste 7 dage",
-        "Sidste 30 dage",
+        "Uge til dato",
+        "Kvartal til dato",
+        "Måned til dato",
+        "Seneste 7 dage",
+        "Seneste 30 dage",
         "Sidste måned",
-        "Dette kvartal til dato",
         "Sidste kvartal",
         "Hele året (YTD)",
-        "Brugerdefineret"
+        "Vælg Datoer"
     ]
     
     col_date1, col_date2 = st.columns([1, 3])
     with col_date1:
-        selected_range = st.selectbox("Vælg tidsperiode", date_options)
+        selected_range = st.selectbox("Vælg Datoer", date_options)
 
     today = datetime.date.today()
     start_date = today
@@ -357,6 +357,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
