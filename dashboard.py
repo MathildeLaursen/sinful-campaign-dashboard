@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -242,19 +243,31 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
 
     st.divider()
 
-    # Række 2: Filtre (Vandret layout)
+    # Række 2: Filtre (Vandret layout) - KASKADERENDE
     st.subheader("🔍 Detaljerede Filtre")
     
-    # Klargør lister (kombinerede kolonner)
+    # Kampagne filter (viser alle)
     all_id_campaigns = sorted(df['ID_Campaign'].astype(str).unique())
-    all_email_messages = sorted(df['Email_Message'].astype(str).unique())
-    all_variants = sorted(df['Variant'].astype(str).unique())
-
-    # 3 kolonner til filtrene (kombinerede)
+    
+    # 3 kolonner til filtrene
     f1, f2, f3 = st.columns(3)
     
     sel_id_campaigns = f1.multiselect("Kampagne", all_id_campaigns, default=[])
+    
+    # Email filter (afhængig af valgt kampagne)
+    if sel_id_campaigns:
+        filtered_for_email = df[df['ID_Campaign'].isin(sel_id_campaigns)]
+    else:
+        filtered_for_email = df
+    all_email_messages = sorted(filtered_for_email['Email_Message'].astype(str).unique())
     sel_email_messages = f2.multiselect("Email", all_email_messages, default=[])
+    
+    # A/B filter (afhængig af valgt email, eller kampagne hvis ingen email valgt)
+    if sel_email_messages:
+        filtered_for_variant = filtered_for_email[filtered_for_email['Email_Message'].isin(sel_email_messages)]
+    else:
+        filtered_for_variant = filtered_for_email
+    all_variants = sorted(filtered_for_variant['Variant'].astype(str).unique())
     sel_variants = f3.multiselect("A/B", all_variants, default=[])
 
 
