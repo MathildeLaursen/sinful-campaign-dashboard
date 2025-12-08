@@ -6,19 +6,53 @@ from streamlit_gsheets import GSheetsConnection
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
 
+# --- SIKKERHED (KODEORD) ---
+def check_password():
+    """Returnerer True hvis brugeren har indtastet rigtigt kodeord."""
+    def password_entered():
+        if st.session_state["password"] == st.secrets["PASSWORD"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Slet kodeord fra memory for sikkerhed
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # Første gang appen kører: Vis login-boks
+        st.text_input(
+            "🔒 Indtast kodeord for at se dashboardet:", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        return False
+    elif not st.session_state["password_correct"]:
+        # Forkert kodeord: Vis login-boks igen + fejlbesked
+        st.text_input(
+            "🔒 Indtast kodeord for at se dashboardet:", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        st.error("😕 Forkert kodeord")
+        return False
+    else:
+        # Rigtigt kodeord: Vis indhold
+        return True
+
+if not check_password():
+    st.stop()  # Stop her, hvis kodeordet ikke er korrekt
+
+# --- HERUNDER ER RESTEN AF DASHBOARDET (KUN SYNLIGT EFTER LOGIN) ---
+
 st.title("📧 Live Dashboard: Email Marketing")
 
-# --- FUNKTION TIL AT INDLÆSE DATA FRA GOOGLE SHEETS ---
+# --- FUNKTION TIL AT INDLÆSE DATA ---
 @st.cache_data(ttl=600)
 def load_google_sheet_data():
     conn = st.connection("gsheets", type=GSheetsConnection)
-    
-    # Læs data, skip række 1 (Info, Total headers)
     df = conn.read(skiprows=1)
     
-    # RENSNING AF DATA
     try:
-        # Tjek om vi har de forventede kolonner, ellers omdøb
         rename_map = {
             df.columns[0]: 'Send Year',
             df.columns[1]: 'Send Month',
@@ -41,64 +75,45 @@ def load_google_sheet_data():
         st.error(f"Kunne ikke mappe kolonner. Fejl: {e}")
         return pd.DataFrame()
 
-    # Opret Dato-kolonne
     df['Date'] = pd.to_datetime(
         df['Send Year'].astype(str) + '-' + 
         df['Send Month'].astype(str) + '-' + 
         df['Send Day'].astype(str), 
         errors='coerce'
     )
-    
     df = df.dropna(subset=['Date'])
 
-    # Rengøring af tal
     numeric_cols = ['Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Unsubscribed']
     for col in numeric_cols:
         if col in df.columns:
             df[col] = df[col].astype(str).str.replace(',', '').str.replace('"', '').str.replace('.', '')
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
     
-    # Beregn Rater (%)
     df['Open Rate %'] = df.apply(lambda x: (x['Unique_Opens'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1)
     df['Click Rate %'] = df.apply(lambda x: (x['Unique_Clicks'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1)
     
     return df
 
-# --- HOVEDPROGRAM ---
 try:
     df = load_google_sheet_data()
     
     if df.empty:
-        st.warning("Ingen data fundet endnu. Tjek at 'Secrets' er sat rigtigt op i Streamlit Cloud.")
+        st.warning("Ingen data fundet.")
         st.stop()
 
-    # --- SIDEBAR FILTRE ---
     st.sidebar.header("🔍 Filtre")
     
     min_date = df['Date'].min()
     max_date = df['Date'].max()
     
-    start_date, end_date = st.sidebar.date_input(
-        "Vælg periode", 
-        [min_date, max_date],
-        min_value=min_date,
-        max_value=max_date
-    )
+    start_date, end_date = st.sidebar.date_input("Vælg periode", [min_date, max_date], min_value=min_date, max_value=max_date)
     
     all_campaigns = sorted(df['Campaign Name'].astype(str).unique())
-    campaign_filter = st.sidebar.multiselect(
-        "Kampagne Navn",
-        options=all_campaigns,
-        default=all_campaigns
-    )
+    campaign_filter = st.sidebar.multiselect("Kampagne Navn", options=all_campaigns, default=all_campaigns)
 
-    mask = (df['Date'] >= pd.to_datetime(start_date)) & \
-           (df['Date'] <= pd.to_datetime(end_date)) & \
-           (df['Campaign Name'].astype(str).isin(campaign_filter))
-    
+    mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date)) & (df['Campaign Name'].astype(str).isin(campaign_filter))
     filtered_df = df.loc[mask]
 
-    # --- DASHBOARD VISUALISERING ---
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     kpi1.metric("Emails Sendt", f"{filtered_df['Total_Received'].sum():,.0f}")
     kpi2.metric("Unikke Opens", f"{filtered_df['Unique_Opens'].sum():,.0f}")
@@ -108,7 +123,6 @@ try:
     st.divider()
 
     col_graph1, col_graph2 = st.columns(2)
-
     with col_graph1:
         st.subheader("📈 Open Rate Udvikling")
         fig_line = px.line(filtered_df.sort_values('Date'), x='Date', y='Open Rate %', hover_data=['Message'])
@@ -117,10 +131,7 @@ try:
 
     with col_graph2:
         st.subheader("🎯 Klik vs. Opens")
-        fig_scatter = px.scatter(
-            filtered_df, x='Open Rate %', y='Click Rate %', 
-            size='Total_Received', color='Campaign Name', hover_name='Message'
-        )
+        fig_scatter = px.scatter(filtered_df, x='Open Rate %', y='Click Rate %', size='Total_Received', color='Campaign Name', hover_name='Message')
         st.plotly_chart(fig_scatter, use_container_width=True)
 
     st.subheader("🏆 Top Performers (Kliks)")
@@ -132,4 +143,4 @@ try:
         st.rerun()
 
 except Exception as e:
-    st.error(f"Der opstod en fejl. Tjek dine indstillinger i Streamlit Cloud Secrets. Fejl: {e}")
+    st.error(f"Der opstod en fejl: {e}")
