@@ -8,44 +8,36 @@ import time
 
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
-st.title("📧 Live Dashboard: Email Marketing")
 
-# --- COOKIE MANAGER (SKAL LIGGE UDENFOR FUNKTIONER) ---
-# Vi initialiserer den her, så den altid er en del af appen
-cookie_manager = stx.CookieManager(key="init_cookie_manager")
+# --- LOGIN & COOKIE LOGIK ---
+# Vi starter manageren helt i toppen
+cookie_manager = stx.CookieManager()
 
-# --- LOGIN LOGIK ---
 def check_password():
-    # 1. Hent cookie værdi
-    cookie_val = cookie_manager.get("sinful_auth")
+    # 1. Hent ALLE cookies (mere stabilt end at hente én)
+    cookies = cookie_manager.get_all()
+    auth_cookie = cookies.get("sinful_auth")
 
-    # 2. Tjek Session State (Hvis vi lige har logget ind i denne session)
-    if st.session_state.get("authenticated", False):
+    # 2. Hvis cookien findes og er 'true', så er vi glade
+    if auth_cookie == "true":
         return True
 
-    # 3. Tjek Cookie (Hvis vi kommer tilbage efter reload)
-    if cookie_val == "true":
-        st.session_state["authenticated"] = True
-        return True
-
-    # 4. Hvis ingen af delene: Vis Login Formular
+    # 3. Vis Login Formular hvis ikke logget ind
+    st.title("📧 Live Dashboard: Email Marketing")
     st.markdown("### 🔒 Adgang påkrævet")
+    
     with st.form("login_form"):
         password_input = st.text_input("Indtast kodeord:", type="password")
         submit_button = st.form_submit_button("Log Ind")
 
         if submit_button:
             if password_input == st.secrets["PASSWORD"]:
-                # A. Sæt session state straks
-                st.session_state["authenticated"] = True
-                
-                # B. Sæt cookie til 30 dage
-                expires = datetime.datetime.now() + datetime.timedelta(days=30)
+                # Sæt cookie til at udløbe om 7 dage
+                expires = datetime.datetime.now() + datetime.timedelta(days=7)
                 cookie_manager.set("sinful_auth", "true", expires_at=expires)
                 
                 st.success("Login godkendt! Opdaterer...")
-                # C. Vigtigt: Vent så browseren når at gemme cookien før reload
-                time.sleep(1)
+                time.sleep(1) # Giv browseren tid til at gemme
                 st.rerun()
             else:
                 st.error("😕 Forkert kodeord")
@@ -55,16 +47,19 @@ def check_password():
 if not check_password():
     st.stop()
 
-# --- SIDEBAR: LOG UD ---
+# --- HERUNDER ER DASHBOARDET (KUN SYNLIGT NÅR LOGGET IND) ---
+
+st.title("📧 Live Dashboard: Email Marketing")
+
+# Log ud knap i menuen
 with st.sidebar:
     if st.button("Log Ud"):
-        # Slet cookie og nulstil session
         cookie_manager.delete("sinful_auth")
-        st.session_state["authenticated"] = False
-        time.sleep(1) # Vent på at sletningen registreres
+        st.success("Logger ud...")
+        time.sleep(1)
         st.rerun()
 
-# --- 2. DATA INDLÆSNING ---
+# --- DATA INDLÆSNING ---
 @st.cache_data(ttl=600)
 def load_google_sheet_data():
     conn = st.connection("gsheets", type=GSheetsConnection)
@@ -95,7 +90,6 @@ def load_google_sheet_data():
     except Exception:
         return pd.DataFrame()
 
-    # Opret Dato
     df['Date'] = pd.to_datetime(
         df['Send Year'].astype(str) + '-' + 
         df['Send Month'].astype(str) + '-' + 
@@ -104,20 +98,17 @@ def load_google_sheet_data():
     )
     df = df.dropna(subset=['Date'])
 
-    # Rens tal
     numeric_cols = ['Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Unsubscribed']
     for col in numeric_cols:
         if col in df.columns:
             df[col] = df[col].astype(str).str.replace(',', '').str.replace('"', '').str.replace('.', '')
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
     
-    # Beregn Rater
     df['Open Rate %'] = df.apply(lambda x: (x['Unique_Opens'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1)
     df['Click Rate %'] = df.apply(lambda x: (x['Unique_Clicks'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1)
     
     return df
 
-# Hent data
 try:
     with st.spinner('Henter data...'):
         df = load_google_sheet_data()
@@ -129,7 +120,7 @@ except Exception as e:
     st.stop()
 
 
-# --- 3. DATO LOGIK ---
+# --- DATO LOGIK ---
 st.sidebar.header("📅 Periode")
 
 date_options = [
@@ -177,16 +168,15 @@ elif selected_range == "Sidste kvartal":
 elif selected_range == "Hele året (YTD)":
     start_date = today.replace(month=1, day=1)
     end_date = today
-else: # Brugerdefineret
+else: 
     start_date = st.sidebar.date_input("Start dato", df['Date'].min())
     end_date = st.sidebar.date_input("Slut dato", df['Date'].max())
 
-# Beregn forrige periode
 delta = end_date - start_date
 prev_end_date = start_date - datetime.timedelta(days=1)
 prev_start_date = prev_end_date - delta
 
-# --- 4. AVANCEREDE FILTRE ---
+# --- FILTRE ---
 st.sidebar.divider()
 st.sidebar.header("🔍 Filtre")
 
@@ -202,7 +192,6 @@ sel_emails = st.sidebar.multiselect("Email Type", all_emails, default=[])
 sel_messages = st.sidebar.multiselect("Message", all_messages, default=[])
 sel_variants = st.sidebar.multiselect("Variant (A/B)", all_variants, default=[])
 
-# --- 5. FILTRERING AF DATA ---
 def filter_data(dataset, start, end):
     mask = (dataset['Date'] >= pd.to_datetime(start)) & (dataset['Date'] <= pd.to_datetime(end))
     temp_df = dataset.loc[mask]
@@ -223,7 +212,7 @@ def filter_data(dataset, start, end):
 current_df = filter_data(df, start_date, end_date)
 prev_df = filter_data(df, prev_start_date, prev_end_date)
 
-# --- 6. KPI KORT ---
+# --- VISUALISERING ---
 st.subheader(f"Overblik: {start_date} - {end_date}")
 if selected_range != "Brugerdefineret":
     st.caption(f"Sammenlignet med forrige periode: {prev_start_date} - {prev_end_date}")
@@ -246,13 +235,10 @@ def show_metric(col, label, current_val, prev_val, format_str, is_percent=False)
 
 cur_sent = current_df['Total_Received'].sum()
 prev_sent = prev_df['Total_Received'].sum()
-
 cur_opens = current_df['Unique_Opens'].sum()
 prev_opens = prev_df['Unique_Opens'].sum()
-
 cur_or = current_df['Open Rate %'].mean() if not current_df.empty else 0
 prev_or = prev_df['Open Rate %'].mean() if not prev_df.empty else 0
-
 cur_cr = current_df['Click Rate %'].mean() if not current_df.empty else 0
 prev_cr = prev_df['Click Rate %'].mean() if not prev_df.empty else 0
 
@@ -263,16 +249,12 @@ show_metric(col4, "Gns. Click Rate", cur_cr, prev_cr, "{:.2f}%", is_percent=True
 
 st.divider()
 
-# --- 7. GRAFER ---
 col_graph1, col_graph2 = st.columns(2)
-
 with col_graph1:
     st.subheader("📈 Udvikling over tid")
     if not current_df.empty:
         graph_df = current_df.sort_values('Date')
-        fig_line = px.line(graph_df, x='Date', y='Open Rate %', 
-                           hover_data=['Message', 'Campaign Name'], 
-                           markers=True)
+        fig_line = px.line(graph_df, x='Date', y='Open Rate %', hover_data=['Message', 'Campaign Name'], markers=True)
         fig_line.update_traces(line_color='#E74C3C')
         st.plotly_chart(fig_line, use_container_width=True)
     else:
@@ -281,28 +263,14 @@ with col_graph1:
 with col_graph2:
     st.subheader("🎯 Klik vs. Opens (Matrix)")
     if not current_df.empty:
-        fig_scatter = px.scatter(
-            current_df, 
-            x='Open Rate %', 
-            y='Click Rate %', 
-            size='Total_Received', 
-            color='Campaign Name', 
-            hover_name='Message'
-        )
+        fig_scatter = px.scatter(current_df, x='Open Rate %', y='Click Rate %', size='Total_Received', color='Campaign Name', hover_name='Message')
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-# --- 8. DATA TABEL ---
 st.subheader("📋 Detaljeret Data")
-
 if not current_df.empty:
     display_df = current_df.copy()
     display_df['Date'] = display_df['Date'].dt.date
-    
-    cols_to_show = [
-        'Date', 'Number', 'Campaign Name', 'Email Type', 'Message', 'Variant',
-        'Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %'
-    ]
-    
+    cols_to_show = ['Date', 'Number', 'Campaign Name', 'Email Type', 'Message', 'Variant', 'Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %']
     st.dataframe(
         display_df[cols_to_show].sort_values(by='Date', ascending=False),
         use_container_width=True,
@@ -316,7 +284,7 @@ if not current_df.empty:
         }
     )
 else:
-    st.warning("Ingen data at vise for de valgte filtre.")
+    st.warning("Ingen data at vise.")
 
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
