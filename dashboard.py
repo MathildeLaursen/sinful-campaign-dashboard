@@ -9,24 +9,18 @@ import time
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
 
-# --- LOGIN LOGIK (ROBUST) ---
+# --- LOGIN LOGIK ---
 def check_password():
-    # Vi initialiserer cookie manageren med en fast key for stabilitet
     cookie_manager = stx.CookieManager(key="main_cookie_manager")
-    
-    # 1. Hent cookie (kan være None hvis den loader)
     cookie_val = cookie_manager.get("sinful_auth")
 
-    # 2. Tjek SESSION STATE først (Det er vores "her og nu" adgang)
     if st.session_state.get("authenticated", False):
         return True
 
-    # 3. Tjek COOKIE (Det er vores "hukommelse")
     if cookie_val == "true":
         st.session_state["authenticated"] = True
         return True
 
-    # 4. Vis Login Skærm
     st.title("📧 Live Dashboard: Email Marketing")
     st.markdown("### 🔒 Adgang påkrævet")
     
@@ -36,25 +30,20 @@ def check_password():
 
         if submit_button:
             if password_input == st.secrets["PASSWORD"]:
-                # A. Luk brugeren ind STRAKS (Vigtigst!)
                 st.session_state["authenticated"] = True
-                
-                # B. Prøv at sætte cookie til fremtiden
                 try:
                     expires = datetime.datetime.now() + datetime.timedelta(days=7)
                     cookie_manager.set("sinful_auth", "true", expires_at=expires)
-                except Exception as e:
-                    st.warning(f"Kunne ikke gemme login til næste gang, men du logges ind nu.")
+                except Exception:
+                    pass
                 
                 st.success("Login godkendt! Vent venligst...")
-                # C. Vent 2 sekunder så cookien når at blive skrevet
                 time.sleep(2)
                 st.rerun()
             else:
                 st.error("😕 Forkert kodeord")
     return False
 
-# Stop koden her, hvis man ikke er logget ind
 if not check_password():
     st.stop()
 
@@ -62,11 +51,10 @@ if not check_password():
 
 st.title("📧 Live Dashboard: Email Marketing")
 
-# Log ud knap i menuen
+# Log ud knap i menuen (sidebar er nu kun til log ud)
 with st.sidebar:
     st.write("✅ Logget ind")
     if st.button("Log Ud"):
-        # Slet cookie og session
         cookie_manager = stx.CookieManager(key="logout_manager")
         cookie_manager.delete("sinful_auth")
         st.session_state["authenticated"] = False
@@ -135,79 +123,96 @@ except Exception as e:
     st.stop()
 
 
-# --- DATO LOGIK ---
-st.sidebar.header("📅 Periode")
+# --- TOP-BAR: FILTRE & DATO (COLLAPSIBLE) ---
 
-date_options = [
-    "Denne måned til dato",
-    "Denne uge til dato",
-    "Sidste 7 dage",
-    "Sidste 30 dage",
-    "Sidste måned",
-    "Dette kvartal til dato",
-    "Sidste kvartal",
-    "Hele året (YTD)",
-    "Brugerdefineret"
-]
+# Vi bruger st.expander til at lave en boks der kan foldes ud/ind
+with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=True):
+    
+    # Række 1: Datovælger
+    st.subheader("📅 Periode")
+    date_options = [
+        "Denne måned til dato",
+        "Denne uge til dato",
+        "Sidste 7 dage",
+        "Sidste 30 dage",
+        "Sidste måned",
+        "Dette kvartal til dato",
+        "Sidste kvartal",
+        "Hele året (YTD)",
+        "Brugerdefineret"
+    ]
+    
+    col_date1, col_date2 = st.columns([1, 3])
+    with col_date1:
+        selected_range = st.selectbox("Vælg tidsperiode", date_options)
 
-selected_range = st.sidebar.selectbox("Vælg tidsperiode", date_options)
-
-today = datetime.date.today()
-
-if selected_range == "Denne måned til dato":
-    start_date = today.replace(day=1)
+    today = datetime.date.today()
+    start_date = today
     end_date = today
-elif selected_range == "Denne uge til dato":
-    start_date = today - datetime.timedelta(days=today.weekday())
-    end_date = today
-elif selected_range == "Sidste 7 dage":
-    start_date = today - datetime.timedelta(days=7)
-    end_date = today
-elif selected_range == "Sidste 30 dage":
-    start_date = today - datetime.timedelta(days=30)
-    end_date = today
-elif selected_range == "Sidste måned":
-    first_of_this_month = today.replace(day=1)
-    end_date = first_of_this_month - datetime.timedelta(days=1)
-    start_date = end_date.replace(day=1)
-elif selected_range == "Dette kvartal til dato":
-    current_q_start_month = 3 * ((today.month - 1) // 3) + 1
-    start_date = today.replace(month=current_q_start_month, day=1)
-    end_date = today
-elif selected_range == "Sidste kvartal":
-    current_q_start_month = 3 * ((today.month - 1) // 3) + 1
-    curr_q_start = today.replace(month=current_q_start_month, day=1)
-    end_date = curr_q_start - datetime.timedelta(days=1)
-    prev_q_start_month = 3 * ((end_date.month - 1) // 3) + 1
-    start_date = end_date.replace(month=prev_q_start_month, day=1)
-elif selected_range == "Hele året (YTD)":
-    start_date = today.replace(month=1, day=1)
-    end_date = today
-else: 
-    start_date = st.sidebar.date_input("Start dato", df['Date'].min())
-    end_date = st.sidebar.date_input("Slut dato", df['Date'].max())
 
-# Beregn periode for sammenligning
-delta = end_date - start_date
-prev_end_date = start_date - datetime.timedelta(days=1)
-prev_start_date = prev_end_date - delta
+    # Dato Logik
+    if selected_range == "Denne måned til dato":
+        start_date = today.replace(day=1)
+        end_date = today
+    elif selected_range == "Denne uge til dato":
+        start_date = today - datetime.timedelta(days=today.weekday())
+        end_date = today
+    elif selected_range == "Sidste 7 dage":
+        start_date = today - datetime.timedelta(days=7)
+        end_date = today
+    elif selected_range == "Sidste 30 dage":
+        start_date = today - datetime.timedelta(days=30)
+        end_date = today
+    elif selected_range == "Sidste måned":
+        first_of_this_month = today.replace(day=1)
+        end_date = first_of_this_month - datetime.timedelta(days=1)
+        start_date = end_date.replace(day=1)
+    elif selected_range == "Dette kvartal til dato":
+        current_q_start_month = 3 * ((today.month - 1) // 3) + 1
+        start_date = today.replace(month=current_q_start_month, day=1)
+        end_date = today
+    elif selected_range == "Sidste kvartal":
+        current_q_start_month = 3 * ((today.month - 1) // 3) + 1
+        curr_q_start = today.replace(month=current_q_start_month, day=1)
+        end_date = curr_q_start - datetime.timedelta(days=1)
+        prev_q_start_month = 3 * ((end_date.month - 1) // 3) + 1
+        start_date = end_date.replace(month=prev_q_start_month, day=1)
+    elif selected_range == "Hele året (YTD)":
+        start_date = today.replace(month=1, day=1)
+        end_date = today
+    else: # Brugerdefineret
+        with col_date2:
+            c1, c2 = st.columns(2)
+            start_date = c1.date_input("Start dato", df['Date'].min())
+            end_date = c2.date_input("Slut dato", df['Date'].max())
 
-# --- FILTRE ---
-st.sidebar.divider()
-st.sidebar.header("🔍 Filtre")
+    delta = end_date - start_date
+    prev_end_date = start_date - datetime.timedelta(days=1)
+    prev_start_date = prev_end_date - delta
 
-all_numbers = sorted(df['Number'].astype(str).unique())
-all_emails = sorted(df['Email Type'].astype(str).unique())
-all_messages = sorted(df['Message'].astype(str).unique())
-all_variants = sorted(df['Variant'].astype(str).unique())
-all_campaigns = sorted(df['Campaign Name'].astype(str).unique())
+    st.divider()
 
-sel_campaigns = st.sidebar.multiselect("Kampagne Navn", all_campaigns, default=[])
-sel_numbers = st.sidebar.multiselect("Number (ID)", all_numbers, default=[])
-sel_emails = st.sidebar.multiselect("Email Type", all_emails, default=[])
-sel_messages = st.sidebar.multiselect("Message", all_messages, default=[])
-sel_variants = st.sidebar.multiselect("Variant (A/B)", all_variants, default=[])
+    # Række 2: Filtre (Vandret layout)
+    st.subheader("🔍 Detaljerede Filtre")
+    
+    # Klargør lister
+    all_numbers = sorted(df['Number'].astype(str).unique())
+    all_emails = sorted(df['Email Type'].astype(str).unique())
+    all_messages = sorted(df['Message'].astype(str).unique())
+    all_variants = sorted(df['Variant'].astype(str).unique())
+    all_campaigns = sorted(df['Campaign Name'].astype(str).unique())
 
+    # 5 kolonner til filtrene
+    f1, f2, f3, f4, f5 = st.columns(5)
+    
+    sel_campaigns = f1.multiselect("Kampagne", all_campaigns, default=[])
+    sel_numbers = f2.multiselect("ID (Number)", all_numbers, default=[])
+    sel_emails = f3.multiselect("Email Type", all_emails, default=[])
+    sel_messages = f4.multiselect("Message", all_messages, default=[])
+    sel_variants = f5.multiselect("Variant", all_variants, default=[])
+
+
+# --- DATA FILTRERING ---
 def filter_data(dataset, start, end):
     mask = (dataset['Date'] >= pd.to_datetime(start)) & (dataset['Date'] <= pd.to_datetime(end))
     temp_df = dataset.loc[mask]
@@ -227,6 +232,7 @@ def filter_data(dataset, start, end):
 
 current_df = filter_data(df, start_date, end_date)
 prev_df = filter_data(df, prev_start_date, prev_end_date)
+
 
 # --- VISUALISERING ---
 st.subheader(f"Overblik: {start_date} - {end_date}")
