@@ -256,7 +256,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     
     # Email filter (afhængig af valgt kampagne)
     if sel_id_campaigns:
-        filtered_for_email = df[df['ID_Campaign'].isin(sel_id_campaigns)]
+        filtered_for_email = df[df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
     else:
         filtered_for_email = df
     all_email_messages = sorted(filtered_for_email['Email_Message'].astype(str).unique())
@@ -264,7 +264,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     
     # A/B filter (afhængig af valgt email, eller kampagne hvis ingen email valgt)
     if sel_email_messages:
-        filtered_for_variant = filtered_for_email[filtered_for_email['Email_Message'].isin(sel_email_messages)]
+        filtered_for_variant = filtered_for_email[filtered_for_email['Email_Message'].astype(str).isin(sel_email_messages)]
     else:
         filtered_for_variant = filtered_for_email
     all_variants = sorted(filtered_for_variant['Variant'].astype(str).unique())
