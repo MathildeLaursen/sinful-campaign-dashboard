@@ -40,11 +40,11 @@ st.markdown("""
         [data-testid="stSidebar"] button {
             min-height: 0px !important;      /* Tillad at den er lav */
             height: auto !important;         /* Tilpas højde til tekst */
-            padding-top: 4px !important;     /* Lille luft i top */
-            padding-bottom: 4px !important;  /* Lille luft i bund */
-            line-height: 1.2 !important;     /* Saml linjerne lidt hvis den wrapper */
+            padding-top: 2px !important;     /* Lille luft i top */
+            padding-bottom: 2px !important;  /* Lille luft i bund */
+            line-height: 1 !important;     /* Saml linjerne lidt hvis den wrapper */
             white-space: nowrap !important;  /* TVING teksten til at blive på én linje */
-            font-size: 14px !important;      /* Gør skriften lidt mindre, så den kan være der */
+            font-size: 10px !important;      /* Gør skriften lidt mindre, så den kan være der */
         }
     </style>
 """, unsafe_allow_html=True)
@@ -350,6 +350,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
