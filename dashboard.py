@@ -9,20 +9,24 @@ import time
 # --- SIDE OPSÆTNING ---
 st.set_page_config(page_title="Sinful KPI Dashboard", layout="wide")
 
-# --- LOGIN & COOKIE LOGIK ---
-# Vi starter manageren helt i toppen
-cookie_manager = stx.CookieManager()
-
+# --- LOGIN LOGIK (ROBUST) ---
 def check_password():
-    # 1. Hent ALLE cookies (mere stabilt end at hente én)
-    cookies = cookie_manager.get_all()
-    auth_cookie = cookies.get("sinful_auth")
+    # Vi initialiserer cookie manageren med en fast key for stabilitet
+    cookie_manager = stx.CookieManager(key="main_cookie_manager")
+    
+    # 1. Hent cookie (kan være None hvis den loader)
+    cookie_val = cookie_manager.get("sinful_auth")
 
-    # 2. Hvis cookien findes og er 'true', så er vi glade
-    if auth_cookie == "true":
+    # 2. Tjek SESSION STATE først (Det er vores "her og nu" adgang)
+    if st.session_state.get("authenticated", False):
         return True
 
-    # 3. Vis Login Formular hvis ikke logget ind
+    # 3. Tjek COOKIE (Det er vores "hukommelse")
+    if cookie_val == "true":
+        st.session_state["authenticated"] = True
+        return True
+
+    # 4. Vis Login Skærm
     st.title("📧 Live Dashboard: Email Marketing")
     st.markdown("### 🔒 Adgang påkrævet")
     
@@ -32,30 +36,41 @@ def check_password():
 
         if submit_button:
             if password_input == st.secrets["PASSWORD"]:
-                # Sæt cookie til at udløbe om 7 dage
-                expires = datetime.datetime.now() + datetime.timedelta(days=7)
-                cookie_manager.set("sinful_auth", "true", expires_at=expires)
+                # A. Luk brugeren ind STRAKS (Vigtigst!)
+                st.session_state["authenticated"] = True
                 
-                st.success("Login godkendt! Opdaterer...")
-                time.sleep(1) # Giv browseren tid til at gemme
+                # B. Prøv at sætte cookie til fremtiden
+                try:
+                    expires = datetime.datetime.now() + datetime.timedelta(days=7)
+                    cookie_manager.set("sinful_auth", "true", expires_at=expires)
+                except Exception as e:
+                    st.warning(f"Kunne ikke gemme login til næste gang, men du logges ind nu.")
+                
+                st.success("Login godkendt! Vent venligst...")
+                # C. Vent 2 sekunder så cookien når at blive skrevet
+                time.sleep(2)
                 st.rerun()
             else:
                 st.error("😕 Forkert kodeord")
     return False
 
-# Stop alt her, hvis ikke logget ind
+# Stop koden her, hvis man ikke er logget ind
 if not check_password():
     st.stop()
 
-# --- HERUNDER ER DASHBOARDET (KUN SYNLIGT NÅR LOGGET IND) ---
+# --- HERUNDER STARTER DASHBOARDET ---
 
 st.title("📧 Live Dashboard: Email Marketing")
 
 # Log ud knap i menuen
 with st.sidebar:
+    st.write("✅ Logget ind")
     if st.button("Log Ud"):
+        # Slet cookie og session
+        cookie_manager = stx.CookieManager(key="logout_manager")
         cookie_manager.delete("sinful_auth")
-        st.success("Logger ud...")
+        st.session_state["authenticated"] = False
+        st.info("Logger ud...")
         time.sleep(1)
         st.rerun()
 
@@ -113,7 +128,7 @@ try:
     with st.spinner('Henter data...'):
         df = load_google_sheet_data()
     if df.empty:
-        st.error("Kunne ikke hente data.")
+        st.error("Kunne ikke hente data. Tjek Secrets.")
         st.stop()
 except Exception as e:
     st.error(f"Fejl: {e}")
@@ -172,6 +187,7 @@ else:
     start_date = st.sidebar.date_input("Start dato", df['Date'].min())
     end_date = st.sidebar.date_input("Slut dato", df['Date'].max())
 
+# Beregn periode for sammenligning
 delta = end_date - start_date
 prev_end_date = start_date - datetime.timedelta(days=1)
 prev_start_date = prev_end_date - delta
