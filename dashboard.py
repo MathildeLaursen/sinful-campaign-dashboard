@@ -405,7 +405,7 @@ prev_df = filter_data(df, prev_start_date, prev_end_date)
 
 
 # --- VISUALISERING ---
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 def show_metric(col, label, current_val, prev_val, format_str, is_percent=False):
     delta = 0
@@ -425,15 +425,22 @@ cur_sent = current_df['Total_Received'].sum()
 prev_sent = prev_df['Total_Received'].sum()
 cur_opens = current_df['Unique_Opens'].sum()
 prev_opens = prev_df['Unique_Opens'].sum()
+cur_clicks = current_df['Unique_Clicks'].sum()
+prev_clicks = prev_df['Unique_Clicks'].sum()
 cur_or = current_df['Open Rate %'].mean() if not current_df.empty else 0
 prev_or = prev_df['Open Rate %'].mean() if not prev_df.empty else 0
 cur_cr = current_df['Click Rate %'].mean() if not current_df.empty else 0
 prev_cr = prev_df['Click Rate %'].mean() if not prev_df.empty else 0
+# Click Through Rate = Clicks / Opens * 100
+cur_ctr = (cur_clicks / cur_opens * 100) if cur_opens > 0 else 0
+prev_ctr = (prev_clicks / prev_opens * 100) if prev_opens > 0 else 0
 
 show_metric(col1, "Emails Sendt", cur_sent, prev_sent, "{:,.0f}")
 show_metric(col2, "Unikke Opens", cur_opens, prev_opens, "{:,.0f}")
-show_metric(col3, "Gns. Open Rate", cur_or, prev_or, "{:.1f}%", is_percent=True)
-show_metric(col4, "Gns. Click Rate", cur_cr, prev_cr, "{:.2f}%", is_percent=True)
+show_metric(col3, "Unikke Clicks", cur_clicks, prev_clicks, "{:,.0f}")
+show_metric(col4, "Gns. Open Rate", cur_or, prev_or, "{:.1f}%", is_percent=True)
+show_metric(col5, "Gns. Click Rate", cur_cr, prev_cr, "{:.2f}%", is_percent=True)
+show_metric(col6, "Click Through Rate", cur_ctr, prev_ctr, "{:.1f}%", is_percent=True)
 
 st.divider()
 
