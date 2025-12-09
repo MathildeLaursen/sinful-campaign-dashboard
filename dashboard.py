@@ -234,7 +234,6 @@ preset_options = [
     "Denne måned",
     "Dette kvartal",
     "I år",
-    "─────────────",  # Divider
     "Sidste måned",
     "Sidste kvartal",
 ]
@@ -252,8 +251,8 @@ with col_preset:
         label_visibility="collapsed"
     )
     
-    # Opdater hvis preset ændres (og ikke divider)
-    if selected_preset != "─────────────" and selected_preset != st.session_state.date_preset:
+    # Opdater hvis preset ændres
+    if selected_preset != st.session_state.date_preset:
         st.session_state.date_preset = selected_preset
         new_range = calculate_date_range(selected_preset)
         if new_range:
