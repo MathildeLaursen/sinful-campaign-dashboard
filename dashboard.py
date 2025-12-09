@@ -274,16 +274,16 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=True):
     col_date1, col_date2, col_date3 = st.columns([1, 1, 1])
     
     with col_date1:
-        selected_range = st.selectbox("Vælg Periode", date_options, index=1)
+        selected_range = st.selectbox("Periode", date_options, index=1)
     
     # Beregn default datoer
     default_start, default_end = get_date_range(selected_range)
     
     with col_date2:
-        start_date = st.date_input("Start dato", default_start)
+        start_date = st.date_input("Start", default_start)
     
     with col_date3:
-        end_date = st.date_input("Slut dato", default_end)
+        end_date = st.date_input("Slut", default_end)
 
     delta = end_date - start_date
     prev_end_date = start_date - datetime.timedelta(days=1)
@@ -297,7 +297,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=True):
     # 3 kolonner til filtrene
     f1, f2, f3 = st.columns(3)
     
-    sel_id_campaigns = f1.multiselect("Kampagne", all_id_campaigns, default=[], placeholder="Vælg kampagne", label_visibility="collapsed")
+    sel_id_campaigns = f1.multiselect("Kampagne", all_id_campaigns, default=[], placeholder="Kampagne", label_visibility="collapsed")
     
     # Email filter (afhængig af valgt kampagne)
     if sel_id_campaigns:
@@ -305,7 +305,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=True):
     else:
         filtered_for_email = df
     all_email_messages = sorted(filtered_for_email['Email_Message'].astype(str).unique())
-    sel_email_messages = f2.multiselect("Email", all_email_messages, default=[], placeholder="Vælg email", label_visibility="collapsed")
+    sel_email_messages = f2.multiselect("Email", all_email_messages, default=[], placeholder="Email", label_visibility="collapsed")
     
     # A/B filter (afhængig af valgt email, eller kampagne hvis ingen email valgt)
     if sel_email_messages:
@@ -313,7 +313,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=True):
     else:
         filtered_for_variant = filtered_for_email
     all_variants = sorted(filtered_for_variant['Variant'].astype(str).unique())
-    sel_variants = f3.multiselect("A/B", all_variants, default=[], placeholder="Vælg A/B", label_visibility="collapsed")
+    sel_variants = f3.multiselect("A/B", all_variants, default=[], placeholder="A/B", label_visibility="collapsed")
 
 
 # --- DATA FILTRERING ---
@@ -413,3 +413,4 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
