@@ -77,35 +77,13 @@ st.markdown("""
             border-color: #ccc !important;
         }
 
-        /* 5. Venstrestil "Press Enter to submit" tekst */
-        .stTextInput small,
-        .stTextInput span,
-        .stTextInput p,
-        .stTextInput [class*="instruction"],
-        .stTextInput [class*="Instruction"],
-        .stTextInput > div small,
-        .stTextInput > div span,
-        [data-testid="stForm"] small,
-        [data-testid="stForm"] span[class*="caption"],
-        form small,
-        form span {
-            text-align: left !important;
-            display: block !important;
-            width: 100% !important;
-        }
-        
-        /* Target flex container der holder teksten til højre */
-        .stTextInput > div > div,
-        .stTextInput > div > div > div {
-            justify-content: flex-start !important;
-            align-items: flex-start !important;
-        }
-        
-        /* Fjern flex på parent der kan påvirke alignment */
-        [data-testid="stForm"] .stTextInput > div > div:last-child {
-            justify-content: flex-start !important;
-            margin-left: 0 !important;
-            margin-right: auto !important;
+        /* 5. Skjul "Press Enter to submit" tekst (kan ikke venstrestilles pga. Streamlit's styling) */
+        .stTextInput [class*="emotion-cache"][class*="instruction" i],
+        .stTextInput + div[class*="emotion-cache"],
+        [data-testid="stForm"] [class*="InputInstruction"],
+        .stForm div[class*="emotion-cache"]:has(> span:only-child),
+        [data-testid="stTextInputRootElement"] + div {
+            display: none !important;
         }
     </style>
 """, unsafe_allow_html=True)
