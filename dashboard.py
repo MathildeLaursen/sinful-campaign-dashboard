@@ -646,28 +646,26 @@ if not current_df.empty:
     # Opret graf med to y-akser
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
-    # Open Rate (venstre y-akse)
+    # Open Rate (venstre y-akse) - søjler
     fig.add_trace(
-        go.Scatter(
+        go.Bar(
             x=chart_df['Date'], 
             y=chart_df['Open Rate'],
             name='Open Rate',
-            line=dict(color='#9B7EBD', width=2),
-            mode='lines+markers',
-            marker=dict(size=6)
+            marker_color='#9B7EBD',
+            opacity=0.85
         ),
         secondary_y=False
     )
     
-    # Click Rate (højre y-akse)
+    # Click Rate (højre y-akse) - søjler
     fig.add_trace(
-        go.Scatter(
+        go.Bar(
             x=chart_df['Date'], 
             y=chart_df['Click Rate'],
             name='Click Rate',
-            line=dict(color='#E8B4CB', width=2),
-            mode='lines+markers',
-            marker=dict(size=6)
+            marker_color='#E8B4CB',
+            opacity=0.85
         ),
         secondary_y=True
     )
@@ -688,7 +686,10 @@ if not current_df.empty:
         plot_bgcolor='rgba(250,245,255,0.5)',
         paper_bgcolor='rgba(0,0,0,0)',
         hovermode='x unified',
-        annotations=[]
+        annotations=[],
+        barmode='group',
+        bargap=0.15,
+        bargroupgap=0.1
     )
     
     # Y-akser styling
