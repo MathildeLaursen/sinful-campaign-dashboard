@@ -174,7 +174,13 @@ def load_google_sheet_data():
     
     # Kombinerede kolonner til filtrering
     df['ID_Campaign'] = df['Number'].astype(str) + ' - ' + df['Campaign Name'].astype(str)
-    df['Email_Message'] = df['Email'].astype(str) + ' - ' + df['Message'].astype(str)
+    # Email_Message med A/B variant hvis den findes
+    df['Email_Message'] = df.apply(
+        lambda x: f"{x['Email']} - {x['Message']} - {x['Variant']}" 
+        if pd.notna(x['Variant']) and str(x['Variant']).strip() not in ['', 'nan', 'None'] 
+        else f"{x['Email']} - {x['Message']}", 
+        axis=1
+    )
     
     return df
 
