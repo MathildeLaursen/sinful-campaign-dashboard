@@ -340,8 +340,7 @@ else:
 
 # Land filter med checkboxes
 with col_land:
-    land_count = len(st.session_state.selected_countries)
-    land_label = f"Land ({land_count})" if land_count < len(all_countries) else "Land"
+    land_label = "Land"
     with st.popover(land_label, use_container_width=True):
         # Vælg alle checkbox
         all_land_selected = len(st.session_state.selected_countries) == len(all_countries)
@@ -461,12 +460,13 @@ def filter_data(dataset, start, end):
         ).reset_index()
         
         # Sørg for at alle lande-kolonner eksisterer
-        for country in ['DK', 'SE', 'NO', 'FI']:
+        all_countries = ['DK', 'SE', 'NO', 'FI', 'FR', 'UK', 'DE', 'AT', 'NL', 'BE', 'CH']
+        for country in all_countries:
             if country not in pivot_df.columns:
                 pivot_df[country] = 0
         
         # Beregn total
-        pivot_df['Total'] = pivot_df['DK'] + pivot_df['SE'] + pivot_df['NO'] + pivot_df['FI']
+        pivot_df['Total'] = sum(pivot_df[c] for c in all_countries)
         
         # Aggreger også for metrics (til KPI cards)
         agg_df = temp_df.groupby(['Date', 'ID_Campaign', 'Email_Message'], as_index=False).agg({
@@ -534,7 +534,7 @@ show_metric(col6, "Click Through Rate", cur_ctr, is_percent=True)
 if not display_pivot_df.empty:
     display_df = display_pivot_df.copy()
     display_df['Date'] = pd.to_datetime(display_df['Date']).dt.date
-    cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total', 'DK', 'SE', 'NO', 'FI']
+    cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total', 'DK', 'SE', 'NO', 'FI', 'FR', 'UK', 'DE', 'AT', 'NL', 'BE', 'CH']
     sorted_df = display_df[cols_to_show].sort_values(by='Date', ascending=False)
     
     # Beregn højde baseret på antal rækker (35px per række + 38px header)
@@ -554,6 +554,13 @@ if not display_pivot_df.empty:
             "SE": st.column_config.NumberColumn("SE", format="localized"),
             "NO": st.column_config.NumberColumn("NO", format="localized"),
             "FI": st.column_config.NumberColumn("FI", format="localized"),
+            "FR": st.column_config.NumberColumn("FR", format="localized"),
+            "UK": st.column_config.NumberColumn("UK", format="localized"),
+            "DE": st.column_config.NumberColumn("DE", format="localized"),
+            "AT": st.column_config.NumberColumn("AT", format="localized"),
+            "NL": st.column_config.NumberColumn("NL", format="localized"),
+            "BE": st.column_config.NumberColumn("BE", format="localized"),
+            "CH": st.column_config.NumberColumn("CH", format="localized"),
         }
     )
 else:
