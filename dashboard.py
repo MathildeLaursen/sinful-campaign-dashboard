@@ -111,7 +111,7 @@ st.markdown("""
         /* JUSTÉR DENNE: Afstand mellem label-tekst og dropdown INDEN i hver gruppe */
         /* Sæt til 0 for minimal afstand */
         [data-testid="stExpander"] .stHorizontalBlock .stHorizontalBlock {
-            gap: 0.3rem !important;  /* Prøv: 0rem, 0.2rem, 0.3rem, 0.5rem */
+            gap: 0.1rem !important;  /* Prøv: 0rem, 0.2rem, 0.3rem, 0.5rem */
         }
         
         [data-testid="stExpander"] .stSelectbox,
@@ -477,5 +477,6 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
