@@ -379,9 +379,12 @@ with st.expander("Filtrér", expanded=True):
     date_mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))
     df_date_filtered = df[date_mask]
     
-    # Initialize session states
+    # Kampagne filter (kun kampagner i valgt periode)
+    all_id_campaigns = sorted(df_date_filtered['ID_Campaign'].astype(str).unique())
+    
+    # Initialize session states med alle værdier pre-selected
     if 'selected_campaigns' not in st.session_state:
-        st.session_state.selected_campaigns = []
+        st.session_state.selected_campaigns = list(all_id_campaigns)
     if 'selected_emails' not in st.session_state:
         st.session_state.selected_emails = []
     if 'selected_variants' not in st.session_state:
@@ -395,8 +398,12 @@ with st.expander("Filtrér", expanded=True):
     if 'search_country' not in st.session_state:
         st.session_state.search_country = ""
     
-    # Kampagne filter (kun kampagner i valgt periode)
-    all_id_campaigns = sorted(df_date_filtered['ID_Campaign'].astype(str).unique())
+    # Opdater selected_campaigns hvis perioden har ændret sig
+    if 'last_date_range' not in st.session_state:
+        st.session_state.last_date_range = (start_date, end_date)
+    if st.session_state.last_date_range != (start_date, end_date):
+        st.session_state.last_date_range = (start_date, end_date)
+        st.session_state.selected_campaigns = list(all_id_campaigns)
     
     # Række 2: Kampagne, Email, A/B, Land
     col_kamp, col_email, col_ab, col_land = st.columns(4)
@@ -422,7 +429,8 @@ with st.expander("Filtrér", expanded=True):
                 # Search box
                 search_term = st.text_input("🔍 Type to search", key="search_campaign", label_visibility="collapsed", placeholder="Type to search")
                 
-                st.divider()
+                # Reduceret spacing (30% af normal)
+                st.markdown("<div style='margin-top: -0.7rem;'></div>", unsafe_allow_html=True)
                 
                 # Filter campaigns by search
                 filtered_campaigns = [c for c in all_id_campaigns if search_term.lower() in c.lower()] if search_term else all_id_campaigns
@@ -446,6 +454,10 @@ with st.expander("Filtrér", expanded=True):
         filtered_for_email = df_date_filtered
     all_email_messages = sorted(filtered_for_email['Email_Message'].astype(str).unique())
     
+    # Pre-select alle emails hvis ikke allerede initialiseret
+    if not st.session_state.selected_emails:
+        st.session_state.selected_emails = list(all_email_messages)
+    
     with col_email:
         em1, em2 = st.columns(ratio_col2)
         with em1:
@@ -467,7 +479,8 @@ with st.expander("Filtrér", expanded=True):
                 # Search box
                 search_term = st.text_input("🔍 Type to search", key="search_email", label_visibility="collapsed", placeholder="Type to search")
                 
-                st.divider()
+                # Reduceret spacing (30% af normal)
+                st.markdown("<div style='margin-top: -0.7rem;'></div>", unsafe_allow_html=True)
                 
                 # Filter emails by search
                 filtered_emails = [e for e in all_email_messages if search_term.lower() in e.lower()] if search_term else all_email_messages
@@ -495,6 +508,10 @@ with st.expander("Filtrér", expanded=True):
     all_variants_display = sorted([v for v in all_variants_raw if v.lower() != 'nan'])
     all_variants_with_nan = sorted(all_variants_raw)
     
+    # Pre-select alle variants hvis ikke allerede initialiseret
+    if not st.session_state.selected_variants:
+        st.session_state.selected_variants = list(all_variants_with_nan)
+    
     with col_ab:
         ab1, ab2 = st.columns(ratio_col3)
         with ab1:
@@ -516,7 +533,8 @@ with st.expander("Filtrér", expanded=True):
                 # Search box
                 search_term = st.text_input("🔍 Type to search", key="search_variant", label_visibility="collapsed", placeholder="Type to search")
                 
-                st.divider()
+                # Reduceret spacing (30% af normal)
+                st.markdown("<div style='margin-top: -0.7rem;'></div>", unsafe_allow_html=True)
                 
                 # Filter variants by search (only display non-nan)
                 filtered_variants = [v for v in all_variants_display if search_term.lower() in v.lower()] if search_term else all_variants_display
@@ -565,7 +583,8 @@ with st.expander("Filtrér", expanded=True):
                 # Search box
                 search_term = st.text_input("🔍 Type to search", key="search_country", label_visibility="collapsed", placeholder="Type to search")
                 
-                st.divider()
+                # Reduceret spacing (30% af normal)
+                st.markdown("<div style='margin-top: -0.7rem;'></div>", unsafe_allow_html=True)
                 
                 # Filter countries by search
                 filtered_countries = [c for c in all_countries if search_term.lower() in c.lower()] if search_term else all_countries
