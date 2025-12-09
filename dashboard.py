@@ -525,12 +525,29 @@ prev_start_date = prev_end_date - pd.Timedelta(days=period_days - 1)
 # Tjek om vi skal vise % ændring (kun hvis ALLE kampagner og emails er valgt)
 show_delta = (len(sel_id_campaigns) == len(all_id_campaigns)) and (len(sel_email_messages) == len(all_email_messages))
 
-# Hent data for foregående periode med samme lande-filter
+# Hent data for foregående periode - kun filtreret på lande (ikke kampagner/emails)
 prev_df = pd.DataFrame()
-if show_delta:
-    prev_result = filter_data(df, prev_start_date.date(), prev_end_date.date())
-    if isinstance(prev_result, tuple):
-        prev_df = prev_result[0]
+if show_delta and len(sel_countries) > 0:
+    prev_mask = (df['Date'] >= pd.to_datetime(prev_start_date)) & (df['Date'] <= pd.to_datetime(prev_end_date))
+    prev_temp = df.loc[prev_mask].copy()
+    prev_temp = prev_temp[prev_temp['Country'].isin(sel_countries)]
+    
+    if not prev_temp.empty:
+        prev_df = prev_temp.groupby(['Date', 'ID_Campaign', 'Email_Message'], as_index=False).agg({
+            'Total_Received': 'sum',
+            'Unique_Opens': 'sum',
+            'Unique_Clicks': 'sum',
+            'Unsubscribed': 'sum'
+        })
+        prev_df['Open Rate %'] = prev_df.apply(
+            lambda x: (x['Unique_Opens'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1
+        )
+        prev_df['Click Rate %'] = prev_df.apply(
+            lambda x: (x['Unique_Clicks'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1
+        )
+        prev_df['Click Through Rate %'] = prev_df.apply(
+            lambda x: (x['Unique_Clicks'] / x['Unique_Opens'] * 100) if x['Unique_Opens'] > 0 else 0, axis=1
+        )
 
 # --- VISUALISERING ---
 col1, col2, col3, col4, col5, col6 = st.columns(6)
