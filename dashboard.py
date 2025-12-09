@@ -103,8 +103,10 @@ st.markdown("""
             gap: 0.5rem !important;
         }
         
+        /* JUSTÉR DENNE VÆRDI for afstand mellem kolonner (boks → tekst) */
+        /* Mindre værdi = tættere sammen, større værdi = mere luft */
         [data-testid="stExpander"] .stHorizontalBlock {
-            gap: 1rem !important;
+            gap: 0.5rem !important;  /* Prøv: 0.25rem, 0.5rem, 1rem, 1.5rem, 2rem */
         }
         
         [data-testid="stExpander"] .stSelectbox,
@@ -294,7 +296,7 @@ with st.expander("Filtrér", expanded=True):
     
     # JUSTÉR SPACING: Ændr første tal i [0.18, 0.82] for at ændre afstand mellem tekst og boks
     # Mindre tal = mindre plads til tekst, større tal = mere plads til tekst
-    label_ratio = [0.15, 0.85]
+    label_ratio = [0.18, 0.82]
     
     # Række 1: Periode, Start, Slut
     col_periode, col_start_group, col_end_group = st.columns(3)
@@ -472,4 +474,3 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
-
