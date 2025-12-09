@@ -106,7 +106,7 @@ st.markdown("""
         /* JUSTÉR DENNE VÆRDI for afstand mellem kolonner (boks → tekst) */
         /* Mindre værdi = tættere sammen, større værdi = mere luft */
         [data-testid="stExpander"] .stHorizontalBlock {
-            gap: 1rem !important;  /* Prøv: 0.25rem, 0.5rem, 1rem, 1.5rem, 2rem */
+            gap: 1.5rem !important;  /* Prøv: 0.25rem, 0.5rem, 1rem, 1.5rem, 2rem */
         }
         
         [data-testid="stExpander"] .stSelectbox,
@@ -472,3 +472,4 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
