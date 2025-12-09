@@ -78,9 +78,18 @@ st.markdown("""
         }
 
         /* 5. Venstrestil "Press Enter to submit" tekst */
-        .stForm [data-testid="InputInstructions"] {
+        .stTextInput > div > div > div:last-child,
+        [data-testid="stForm"] .stTextInput > div > div > div,
+        .stTextInput div[data-testid="InputInstructions"],
+        div[data-testid="InputInstructions"] {
             text-align: left !important;
             justify-content: flex-start !important;
+            float: left !important;
+        }
+        
+        .stTextInput > div > div {
+            flex-direction: column !important;
+            align-items: flex-start !important;
         }
     </style>
 """, unsafe_allow_html=True)
