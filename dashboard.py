@@ -433,25 +433,28 @@ else:
 
 # Land filter - brug multiselect
 with col_land:
+    # Brug None check i stedet for truthiness check
+    land_default = st.session_state.selected_countries if st.session_state.selected_countries is not None else all_countries
     selected_countries = st.multiselect(
         "Land",
         options=all_countries,
-        default=st.session_state.selected_countries if st.session_state.selected_countries else all_countries,
+        default=land_default if land_default else None,
         key="land_multiselect",
         label_visibility="collapsed"
     )
-    st.session_state.selected_countries = selected_countries if selected_countries else []
+    st.session_state.selected_countries = list(selected_countries)
 
 # Kampagne filter - brug multiselect
 with col_kamp:
+    kamp_default = st.session_state.selected_campaigns if st.session_state.selected_campaigns is not None else all_id_campaigns
     selected_campaigns = st.multiselect(
         "Kampagne", 
         options=all_id_campaigns,
-        default=st.session_state.selected_campaigns if st.session_state.selected_campaigns else all_id_campaigns,
+        default=kamp_default if kamp_default else None,
         key="kampagne_multiselect",
         label_visibility="collapsed"
     )
-    st.session_state.selected_campaigns = selected_campaigns if selected_campaigns else []
+    st.session_state.selected_campaigns = list(selected_campaigns)
 
 sel_id_campaigns = st.session_state.selected_campaigns
 
@@ -472,14 +475,15 @@ else:
 
 # Email filter - brug multiselect
 with col_email:
+    email_default = st.session_state.selected_emails if st.session_state.selected_emails is not None else all_email_messages
     selected_emails = st.multiselect(
         "Email",
         options=all_email_messages,
-        default=st.session_state.selected_emails if st.session_state.selected_emails else all_email_messages,
+        default=email_default if email_default else None,
         key="email_multiselect",
         label_visibility="collapsed"
     )
-    st.session_state.selected_emails = selected_emails if selected_emails else []
+    st.session_state.selected_emails = list(selected_emails)
 
 sel_email_messages = st.session_state.selected_emails
 sel_countries = st.session_state.selected_countries
@@ -491,15 +495,14 @@ def filter_data(dataset, start, end):
     mask = (dataset['Date'] >= pd.to_datetime(start)) & (dataset['Date'] <= pd.to_datetime(end))
     temp_df = dataset.loc[mask].copy()
     
+    # Hvis nogen filter er tom liste, returner tom data
+    if len(sel_countries) == 0 or len(sel_id_campaigns) == 0 or len(sel_email_messages) == 0:
+        return pd.DataFrame(), pd.DataFrame()
+    
     # Anvend filtre
-    if sel_countries:
-        temp_df = temp_df[temp_df['Country'].isin(sel_countries)]
-    
-    if sel_id_campaigns:
-        temp_df = temp_df[temp_df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
-    
-    if sel_email_messages:
-        temp_df = temp_df[temp_df['Email_Message'].astype(str).isin(sel_email_messages)]
+    temp_df = temp_df[temp_df['Country'].isin(sel_countries)]
+    temp_df = temp_df[temp_df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
+    temp_df = temp_df[temp_df['Email_Message'].astype(str).isin(sel_email_messages)]
     
     if not temp_df.empty:
         # Pivot data så vi får en kolonne per land
