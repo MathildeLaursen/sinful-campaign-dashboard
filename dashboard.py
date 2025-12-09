@@ -113,11 +113,11 @@ st.markdown("""
             gap: 0.2rem !important;
         }
         
-        /* Tving label-kolonnen til kun at tage den plads den behøver */
+        /* Fast bredde på label-kolonnen så de flugter */
         [data-testid="stExpander"] .stHorizontalBlock .stHorizontalBlock .stColumn:first-child {
-            flex: 0 0 auto !important;
-            width: auto !important;
-            min-width: fit-content !important;
+            flex: 0 0 75px !important;  /* JUSTÉR: Bredde på label-kolonnen */
+            width: 75px !important;
+            min-width: 75px !important;
         }
         
         /* Lad dropdown-kolonnen fylde resten */
