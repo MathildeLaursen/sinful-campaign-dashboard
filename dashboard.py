@@ -192,32 +192,66 @@ with st.sidebar:
 def load_google_sheet_data():
     conn = st.connection("gsheets", type=GSheetsConnection)
     try:
-        df = conn.read(skiprows=1)
+        raw_df = conn.read(skiprows=2)  # Skip begge header-rækker
     except Exception:
         return pd.DataFrame()
     
-    try:
-        rename_map = {
-            df.columns[0]: 'Send Year',
-            df.columns[1]: 'Send Month',
-            df.columns[2]: 'Send Day',
-            df.columns[3]: 'Send Time',
-            df.columns[4]: 'Number',
-            df.columns[5]: 'Campaign Name',
-            df.columns[6]: 'Email',
-            df.columns[7]: 'Message',
-            df.columns[8]: 'Variant',
-            df.columns[9]: 'Total_Received',
-            df.columns[10]: 'Total_Opens_Raw',
-            df.columns[11]: 'Unique_Opens',
-            df.columns[12]: 'Total_Clicks_Raw',
-            df.columns[13]: 'Unique_Clicks',
-            df.columns[14]: 'Unsubscribed'
-        }
-        df = df.rename(columns=rename_map)
-    except Exception:
+    # Landekonfiguration: (land, startkolonne-index)
+    # DK starter i kolonne P (index 15 i 0-indexed)
+    country_configs = [
+        ('DK', 15),   # Kolonne P (15 i 0-indexed)
+        ('SE', 21),   # Kolonne V (21 i 0-indexed) 
+        ('NO', 27),   # Kolonne AB (27 i 0-indexed)
+        ('FI', 33),   # Kolonne AH (33 i 0-indexed)
+        ('FR', 39),   # Kolonne AN (39 i 0-indexed)
+        ('UK', 45),   # Kolonne AT (45 i 0-indexed)
+        ('DE', 51),   # Kolonne AZ (51 i 0-indexed)
+        ('AT', 57),   # Kolonne BF (57 i 0-indexed)
+        ('NL', 63),   # Kolonne BL (63 i 0-indexed)
+        ('BE', 69),   # Kolonne BR (69 i 0-indexed)
+        ('CH', 75),   # Kolonne BX (75 i 0-indexed)
+    ]
+    
+    all_country_data = []
+    
+    for country_code, start_col in country_configs:
+        try:
+            # Opret DataFrame for dette land
+            country_df = pd.DataFrame()
+            
+            # Fælles kolonner (0-8)
+            country_df['Send Year'] = raw_df.iloc[:, 0]
+            country_df['Send Month'] = raw_df.iloc[:, 1]
+            country_df['Send Day'] = raw_df.iloc[:, 2]
+            country_df['Send Time'] = raw_df.iloc[:, 3]
+            country_df['Number'] = raw_df.iloc[:, 4]
+            country_df['Campaign Name'] = raw_df.iloc[:, 5]
+            country_df['Email'] = raw_df.iloc[:, 6]
+            country_df['Message'] = raw_df.iloc[:, 7]
+            country_df['Variant'] = raw_df.iloc[:, 8]
+            
+            # Metrics for dette land
+            country_df['Total_Received'] = raw_df.iloc[:, start_col + 0]  # Received Email
+            country_df['Total_Opens_Raw'] = raw_df.iloc[:, start_col + 1]  # Total Opens
+            country_df['Unique_Opens'] = raw_df.iloc[:, start_col + 2]     # Unique Opens
+            country_df['Total_Clicks_Raw'] = raw_df.iloc[:, start_col + 3] # Total Clicks
+            country_df['Unique_Clicks'] = raw_df.iloc[:, start_col + 4]    # Unique Clicks
+            country_df['Unsubscribed'] = raw_df.iloc[:, start_col + 5]     # Unsubscribed
+            
+            # Tilføj landekode
+            country_df['Country'] = country_code
+            
+            all_country_data.append(country_df)
+        except Exception:
+            continue
+    
+    if not all_country_data:
         return pd.DataFrame()
-
+    
+    # Kombiner alle lande
+    df = pd.concat(all_country_data, ignore_index=True)
+    
+    # Opret dato
     df['Date'] = pd.to_datetime(
         df['Send Year'].astype(str) + '-' + 
         df['Send Month'].astype(str) + '-' + 
@@ -225,13 +259,15 @@ def load_google_sheet_data():
         errors='coerce'
     )
     df = df.dropna(subset=['Date'])
-
+    
+    # Konverter numeriske kolonner
     numeric_cols = ['Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Unsubscribed']
     for col in numeric_cols:
         if col in df.columns:
             df[col] = df[col].astype(str).str.replace(',', '').str.replace('"', '').str.replace('.', '')
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
     
+    # Beregn rates
     df['Open Rate %'] = df.apply(lambda x: (x['Unique_Opens'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1)
     df['Click Rate %'] = df.apply(lambda x: (x['Unique_Clicks'] / x['Total_Received'] * 100) if x['Total_Received'] > 0 else 0, axis=1)
     df['Click Through Rate %'] = df.apply(lambda x: (x['Unique_Clicks'] / x['Unique_Opens'] * 100) if x['Unique_Opens'] > 0 else 0, axis=1)
@@ -239,34 +275,6 @@ def load_google_sheet_data():
     # Kombinerede kolonner til filtrering
     df['ID_Campaign'] = df['Number'].astype(str) + ' - ' + df['Campaign Name'].astype(str)
     df['Email_Message'] = df['Email'].astype(str) + ' - ' + df['Message'].astype(str)
-    
-    # Ekstraher land fra kampagnenavn eller brug DK som standard
-    def extract_country(campaign_name):
-        campaign_str = str(campaign_name).upper()
-        countries = ['DK', 'SE', 'NO', 'FI', 'DE', 'UK', 'US', 'FR', 'ES', 'IT', 'NL', 'BE', 'AT', 'CH', 'PL']
-        
-        # Tjek med forskellige separatorer og positioner
-        for country in countries:
-            # Med separatorer
-            if (f'_{country}_' in campaign_str or 
-                f'-{country}-' in campaign_str or 
-                f' {country} ' in campaign_str or
-                f'_{country}' in campaign_str or
-                f'{country}_' in campaign_str or
-                f'-{country}' in campaign_str or
-                f'{country}-' in campaign_str or
-                # I starten/slutningen
-                campaign_str.startswith(f'{country}_') or
-                campaign_str.startswith(f'{country}-') or
-                campaign_str.startswith(f'{country} ') or
-                campaign_str.endswith(f'_{country}') or
-                campaign_str.endswith(f'-{country}') or
-                campaign_str.endswith(f' {country}')):
-                return country
-        
-        return 'DK'  # Standard
-    
-    df['Country'] = df['Campaign Name'].apply(extract_country)
     
     return df
 
