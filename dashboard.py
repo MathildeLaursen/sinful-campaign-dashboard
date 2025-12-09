@@ -42,20 +42,23 @@ st.markdown("""
             // Find alle calendars og style deres parent containers
             document.querySelectorAll('[data-baseweb="calendar"]').forEach(calendar => {
                 // Style kalenderen selv
-                calendar.style.background = 'linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%)';
-                calendar.style.border = '1px solid #D4BFFF';
-                calendar.style.borderRadius = '12px';
+                calendar.style.setProperty('background', 'linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%)', 'important');
+                calendar.style.setProperty('border', '1px solid #D4BFFF', 'important');
+                calendar.style.setProperty('border-radius', '12px', 'important');
                 
                 // Gå op i DOM træet og style alle parent containers
                 let parent = calendar.parentElement;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 10; i++) {
                     if (parent) {
-                        parent.style.background = 'linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%)';
-                        parent.style.backgroundColor = 'transparent';
+                        // Fjern hvid baggrund
+                        parent.style.setProperty('background', 'linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%)', 'important');
+                        parent.style.setProperty('background-color', 'transparent', 'important');
+                        
+                        // Hvis det er popover, tilføj border og shadow
                         if (parent.getAttribute('data-baseweb') === 'popover') {
-                            parent.style.border = '1px solid #D4BFFF';
-                            parent.style.borderRadius = '12px';
-                            parent.style.boxShadow = '0 8px 32px rgba(155, 126, 189, 0.2)';
+                            parent.style.setProperty('border', '1px solid #D4BFFF', 'important');
+                            parent.style.setProperty('border-radius', '12px', 'important');
+                            parent.style.setProperty('box-shadow', '0 8px 32px rgba(155, 126, 189, 0.2)', 'important');
                             break;
                         }
                         parent = parent.parentElement;
@@ -65,9 +68,9 @@ st.markdown("""
             
             // Style datepicker containers
             document.querySelectorAll('[data-baseweb="datepicker"]').forEach(dp => {
-                dp.style.background = 'linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%)';
-                dp.style.border = '1px solid #D4BFFF';
-                dp.style.borderRadius = '12px';
+                dp.style.setProperty('background', 'linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%)', 'important');
+                dp.style.setProperty('border', '1px solid #D4BFFF', 'important');
+                dp.style.setProperty('border-radius', '12px', 'important');
             });
         }
         
