@@ -180,7 +180,6 @@ except Exception as e:
 with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     
     # Række 1: Datovælger
-    st.subheader("📅 Vælg Periode")
     date_options = [
         "Seneste 7 dage",
         "Seneste 30 dage",
@@ -189,8 +188,7 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
         "Kvartal til dato",
         "Sidste måned",
         "Sidste kvartal",
-        "I år (YTD)",
-        "Brugerdefineret"
+        "I år (YTD)"
     ]
     
     today = datetime.date.today()
@@ -220,8 +218,8 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
             return end.replace(month=prev_q_start_month, day=1), end
         elif selection == "I år (YTD)":
             return today.replace(month=1, day=1), today
-        else:  # Brugerdefineret
-            return None, None
+        else:
+            return today - datetime.timedelta(days=30), today
     
     col_date1, col_date2, col_date3 = st.columns([1, 1, 1])
     
@@ -230,11 +228,6 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     
     # Beregn default datoer
     default_start, default_end = get_date_range(selected_range)
-    
-    # Hvis brugerdefineret, brug fuldt datasæt som default
-    if default_start is None:
-        default_start = df['Date'].min().date() if hasattr(df['Date'].min(), 'date') else df['Date'].min()
-        default_end = df['Date'].max().date() if hasattr(df['Date'].max(), 'date') else df['Date'].max()
     
     with col_date2:
         start_date = st.date_input("Start dato", default_start)
@@ -249,7 +242,6 @@ with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=False):
     st.divider()
 
     # Række 2: Filtre (Vandret layout) - KASKADERENDE
-    st.subheader("🔍 Detaljerede Filtre")
     
     # Kampagne filter (viser alle)
     all_id_campaigns = sorted(df['ID_Campaign'].astype(str).unique())
