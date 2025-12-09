@@ -503,10 +503,15 @@ with st.expander("Filtrér", expanded=True):
     else:
         filtered_for_variant = filtered_for_email
     
-    # Fjern "nan" fra visning men gem alle variants (inkl nan)
+    # Inkluder alle variants, men map "nan" til pæn visning
     all_variants_raw = filtered_for_variant['Variant'].astype(str).unique()
-    all_variants_display = sorted([v for v in all_variants_raw if v.lower() != 'nan'])
     all_variants_with_nan = sorted(all_variants_raw)
+    
+    # Map nan til visning
+    def display_variant(v):
+        if v.lower() == 'nan':
+            return "(Ingen)"
+        return v
     
     # Pre-select alle variants hvis ikke allerede initialiseret
     if not st.session_state.selected_variants:
@@ -536,13 +541,14 @@ with st.expander("Filtrér", expanded=True):
                 # Reduceret spacing (30% af normal)
                 st.markdown("<div style='margin-top: -0.7rem;'></div>", unsafe_allow_html=True)
                 
-                # Filter variants by search (only display non-nan)
-                filtered_variants = [v for v in all_variants_display if search_term.lower() in v.lower()] if search_term else all_variants_display
+                # Filter variants by search
+                filtered_variants = [v for v in all_variants_with_nan if search_term.lower() in display_variant(v).lower()] if search_term else all_variants_with_nan
                 
                 # Checkboxes for variants
                 for variant in filtered_variants:
+                    display_label = display_variant(variant)
                     is_selected = variant in st.session_state.selected_variants
-                    if st.checkbox(variant, value=is_selected, key=f"variant_{variant}"):
+                    if st.checkbox(display_label, value=is_selected, key=f"variant_{variant}"):
                         if variant not in st.session_state.selected_variants:
                             st.session_state.selected_variants.append(variant)
                     else:
