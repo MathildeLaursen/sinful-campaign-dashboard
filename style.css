@@ -104,23 +104,6 @@ input:focus, input:active,
     outline: none !important;
 }
 
-/* Skjul søgefelt i selectbox dropdown */
-.stSelectbox [data-baseweb="popover"] input,
-[data-baseweb="popover"] [data-baseweb="input"],
-[data-baseweb="popover"] input[aria-autocomplete="list"],
-/* Mere aggressive selectors */
-[data-baseweb="menu"] input,
-[data-baseweb="select"] input[role="combobox"],
-ul[role="listbox"] ~ input,
-div[data-baseweb="popover"] input:not([type="checkbox"]),
-.stSelectbox input[aria-expanded] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-}
 
 div[data-baseweb="select"] > div {
     border-color: #D4BFFF !important;
