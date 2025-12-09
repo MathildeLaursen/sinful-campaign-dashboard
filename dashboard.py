@@ -750,9 +750,9 @@ if not current_df.empty:
             "Total_Received": st.column_config.NumberColumn("Sendt", format="localized", width="small"),
             "Unique_Opens": st.column_config.NumberColumn("Opens", format="localized", width="small"),
             "Unique_Clicks": st.column_config.NumberColumn("Clicks", format="localized", width="small"),
-            "Open Rate %": st.column_config.NumberColumn("OR%", format="%.1f%%", width="small"),
-            "Click Rate %": st.column_config.NumberColumn("CR%", format="%.1f%%", width="small"),
-            "Click Through Rate %": st.column_config.NumberColumn("CTR%", format="%.1f%%", width="small"),
+            "Open Rate %": st.column_config.NumberColumn("Open Rate", format="%.1f%%", width="small"),
+            "Click Rate %": st.column_config.NumberColumn("Click Rate", format="%.1f%%", width="small"),
+            "Click Through Rate %": st.column_config.NumberColumn("CTR", format="%.1f%%", width="small"),
         }
     )
 else:
