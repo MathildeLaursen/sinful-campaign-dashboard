@@ -394,6 +394,19 @@ div[data-testid="stCheckbox"] label span:first-child {
     box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
 }
 
+/* Kalender popover container (den hvide boks) */
+[data-baseweb="popover"] > div {
+    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
+    border: 1px solid #D4BFFF !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
+}
+
+/* Datepicker container */
+[data-baseweb="datepicker"] {
+    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
+}
+
 /* Skjul "Choose a date range" dropdown og tekst i kalenderen */
 [data-baseweb="datepicker"] [data-baseweb="select"],
 [data-baseweb="datepicker"] > div > div:has([data-baseweb="select"]),
