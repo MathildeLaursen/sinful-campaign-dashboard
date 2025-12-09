@@ -128,16 +128,6 @@ if not check_password():
 
 # --- HERUNDER STARTER DASHBOARDET ---
 
-# Log ud knap i øverste højre hjørne
-with st.container():
-    if st.button("Log Ud", key="logout_btn_top_right"):
-        cookie_manager = stx.CookieManager(key="logout_manager")
-        cookie_manager.delete("sinful_auth")
-        st.session_state["authenticated"] = False
-        st.info("Logger ud...")
-        time.sleep(1)
-        st.rerun()
-
 # Titel
 st.title("Newsletter Dashboard")
 
