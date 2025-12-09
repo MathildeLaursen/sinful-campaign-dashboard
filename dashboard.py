@@ -601,16 +601,18 @@ def show_metric(col, label, current_val, prev_val=None, is_percent=False):
 cur_sent = current_df['Total_Received'].sum() if not current_df.empty else 0
 cur_opens = current_df['Unique_Opens'].sum() if not current_df.empty else 0
 cur_clicks = current_df['Unique_Clicks'].sum() if not current_df.empty else 0
-cur_or = current_df['Open Rate %'].mean() if not current_df.empty else 0
-cur_cr = current_df['Click Rate %'].mean() if not current_df.empty else 0
+# Beregn rates fra summerede tal (vægtet korrekt)
+cur_or = (cur_opens / cur_sent * 100) if cur_sent > 0 else 0
+cur_cr = (cur_clicks / cur_sent * 100) if cur_sent > 0 else 0
 cur_ctr = (cur_clicks / cur_opens * 100) if cur_opens > 0 else 0
 
 # Foregående periode værdier
 prev_sent = prev_df['Total_Received'].sum() if not prev_df.empty and show_delta else None
 prev_opens = prev_df['Unique_Opens'].sum() if not prev_df.empty and show_delta else None
 prev_clicks = prev_df['Unique_Clicks'].sum() if not prev_df.empty and show_delta else None
-prev_or = prev_df['Open Rate %'].mean() if not prev_df.empty and show_delta else None
-prev_cr = prev_df['Click Rate %'].mean() if not prev_df.empty and show_delta else None
+# Beregn rates fra summerede tal (vægtet korrekt)
+prev_or = (prev_opens / prev_sent * 100) if prev_sent and prev_sent > 0 and show_delta else None
+prev_cr = (prev_clicks / prev_sent * 100) if prev_sent and prev_sent > 0 and show_delta else None
 prev_ctr = (prev_clicks / prev_opens * 100) if prev_opens and prev_opens > 0 and show_delta else None
 
 show_metric(col1, "Emails Sendt", cur_sent, prev_sent)
