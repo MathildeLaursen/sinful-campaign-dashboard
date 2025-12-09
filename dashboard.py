@@ -300,7 +300,7 @@ with st.expander("Filtrér", expanded=True):
             return today - datetime.timedelta(days=30), today
     
     # Label bredde - hold denne lav, spacing styres nu via CSS
-    label_ratio = [0.12, 0.88]
+    label_ratio = [0.15, 0.85]
     
     # Række 1: Periode, Start, Slut
     col_periode, col_start_group, col_end_group = st.columns(3)
@@ -477,6 +477,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
