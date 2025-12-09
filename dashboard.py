@@ -295,16 +295,16 @@ with st.expander("Filtrér)", expanded=True):
     col_date1, col_date2, col_date3 = st.columns([1, 1, 1])
     
     with col_date1:
-        selected_range = st.selectbox("Periode", date_options, index=1)
+        selected_range = st.selectbox("Periode", date_options, index=1, label_visibility="collapsed")
     
     # Beregn default datoer
     default_start, default_end = get_date_range(selected_range)
     
     with col_date2:
-        start_date = st.date_input("Start", default_start)
+        start_date = st.date_input(f"Start: {default_start}", default_start, label_visibility="collapsed")
     
     with col_date3:
-        end_date = st.date_input("Slut", default_end)
+        end_date = st.date_input(f"Slut: {default_end}", default_end, label_visibility="collapsed")
 
     delta = end_date - start_date
     prev_end_date = start_date - datetime.timedelta(days=1)
