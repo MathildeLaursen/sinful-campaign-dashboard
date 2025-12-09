@@ -342,19 +342,20 @@ else:
 with col_land:
     land_label = "Land"
     with st.popover(land_label, use_container_width=True):
-        # Vælg alle checkbox
-        all_land_selected = len(st.session_state.selected_countries) == len(all_countries)
-        select_all_land = st.checkbox("Vælg alle", value=all_land_selected, key=f"sel_all_land_{st.session_state.cb_reset_land}")
-        if select_all_land and not all_land_selected:
-            st.session_state.selected_countries = list(all_countries)
-            st.session_state.cb_reset_land += 1
-            st.rerun()
-        elif not select_all_land and all_land_selected:
-            st.session_state.selected_countries = []
-            st.session_state.cb_reset_land += 1
-            st.rerun()
+        # Vælg alle / Fravælg alle knapper
+        col_sel, col_desel = st.columns(2)
+        with col_sel:
+            if st.button("Vælg alle", key="btn_sel_all_land", use_container_width=True):
+                st.session_state.selected_countries = list(all_countries)
+                st.session_state.cb_reset_land += 1
+                st.rerun()
+        with col_desel:
+            if st.button("Fravælg alle", key="btn_desel_all_land", use_container_width=True):
+                st.session_state.selected_countries = []
+                st.session_state.cb_reset_land += 1
+                st.rerun()
         
-        st.markdown("<div style='margin: 0;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin: 0.5rem 0;'></div>", unsafe_allow_html=True)
         reset_land = st.session_state.cb_reset_land
         for country in all_countries:
             checked = country in st.session_state.selected_countries
@@ -370,19 +371,20 @@ with col_kamp:
     kamp_count = len(st.session_state.selected_campaigns)
     kamp_label = f"Kampagne ({kamp_count})" if kamp_count < len(all_id_campaigns) else "Kampagne"
     with st.popover(kamp_label, use_container_width=True):
-        # Vælg alle checkbox
-        all_kamp_selected = len(st.session_state.selected_campaigns) == len(all_id_campaigns)
-        select_all_kamp = st.checkbox("Vælg alle", value=all_kamp_selected, key=f"sel_all_kamp_{st.session_state.cb_reset_kamp}")
-        if select_all_kamp and not all_kamp_selected:
-            st.session_state.selected_campaigns = list(all_id_campaigns)
-            st.session_state.cb_reset_kamp += 1
-            st.rerun()
-        elif not select_all_kamp and all_kamp_selected:
-            st.session_state.selected_campaigns = []
-            st.session_state.cb_reset_kamp += 1
-            st.rerun()
+        # Vælg alle / Fravælg alle knapper
+        col_sel, col_desel = st.columns(2)
+        with col_sel:
+            if st.button("Vælg alle", key="btn_sel_all_kamp", use_container_width=True):
+                st.session_state.selected_campaigns = list(all_id_campaigns)
+                st.session_state.cb_reset_kamp += 1
+                st.rerun()
+        with col_desel:
+            if st.button("Fravælg alle", key="btn_desel_all_kamp", use_container_width=True):
+                st.session_state.selected_campaigns = []
+                st.session_state.cb_reset_kamp += 1
+                st.rerun()
         
-        st.markdown("<div style='margin: 0;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin: 0.5rem 0;'></div>", unsafe_allow_html=True)
         search_kamp = st.text_input("Søg", key="search_kamp", placeholder="Søg...", label_visibility="collapsed")
         filtered_campaigns = [c for c in all_id_campaigns if search_kamp.lower() in c.lower()] if search_kamp else all_id_campaigns
         
@@ -401,19 +403,20 @@ with col_email:
     email_count = len(st.session_state.selected_emails)
     email_label = f"Email ({email_count})" if email_count < len(all_email_messages) else "Email"
     with st.popover(email_label, use_container_width=True):
-        # Vælg alle checkbox
-        all_email_selected = len(st.session_state.selected_emails) == len(all_email_messages)
-        select_all_email = st.checkbox("Vælg alle", value=all_email_selected, key=f"sel_all_email_{st.session_state.cb_reset_email}")
-        if select_all_email and not all_email_selected:
-            st.session_state.selected_emails = list(all_email_messages)
-            st.session_state.cb_reset_email += 1
-            st.rerun()
-        elif not select_all_email and all_email_selected:
-            st.session_state.selected_emails = []
-            st.session_state.cb_reset_email += 1
-            st.rerun()
+        # Vælg alle / Fravælg alle knapper
+        col_sel, col_desel = st.columns(2)
+        with col_sel:
+            if st.button("Vælg alle", key="btn_sel_all_email", use_container_width=True):
+                st.session_state.selected_emails = list(all_email_messages)
+                st.session_state.cb_reset_email += 1
+                st.rerun()
+        with col_desel:
+            if st.button("Fravælg alle", key="btn_desel_all_email", use_container_width=True):
+                st.session_state.selected_emails = []
+                st.session_state.cb_reset_email += 1
+                st.rerun()
         
-        st.markdown("<div style='margin: 0;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin: 0.5rem 0;'></div>", unsafe_allow_html=True)
         search_email = st.text_input("Søg", key="search_email_input", placeholder="Søg...", label_visibility="collapsed")
         filtered_emails = [e for e in all_email_messages if search_email.lower() in e.lower()] if search_email else all_email_messages
         
