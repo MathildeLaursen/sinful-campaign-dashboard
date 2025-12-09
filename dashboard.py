@@ -235,14 +235,92 @@ st.markdown("""
             box-shadow: 0 0 0 2px rgba(155, 126, 189, 0.2) !important;
         }
         
-        /* Venstrestil data i tabel */
+        /* Tabel unicorn styling */
+        [data-testid="stDataFrame"] {
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 20px rgba(155, 126, 189, 0.15) !important;
+        }
+        
         [data-testid="stDataFrame"] td {
             text-align: left !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            border-bottom: 1px solid rgba(212, 191, 255, 0.3) !important;
         }
         
         [data-testid="stDataFrame"] th {
             text-align: left !important;
-            background: linear-gradient(135deg, #F5E6FF 0%, #FFE6F5 100%) !important;
+            background: linear-gradient(135deg, #E8D5FF 0%, #FFD5E8 100%) !important;
+            color: #4A3F55 !important;
+            font-weight: 600 !important;
+            border-bottom: 2px solid #D4BFFF !important;
+        }
+        
+        [data-testid="stDataFrame"] tr:hover td {
+            background: rgba(212, 191, 255, 0.15) !important;
+        }
+        
+        /* Kalender/DateInput unicorn styling */
+        .stDateInput > div > div {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(250,245,255,0.95) 100%) !important;
+            border: 1px solid #D4BFFF !important;
+            border-radius: 10px !important;
+        }
+        
+        .stDateInput input {
+            color: #4A3F55 !important;
+        }
+        
+        /* Kalender popup */
+        [data-baseweb="calendar"] {
+            background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
+            border: 1px solid #D4BFFF !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
+        }
+        
+        /* Kalender header (måned/år) */
+        [data-baseweb="calendar"] [data-baseweb="typo-headingxsmall"],
+        [data-baseweb="calendar"] button {
+            color: #4A3F55 !important;
+        }
+        
+        /* Kalender dage */
+        [data-baseweb="calendar"] [role="gridcell"] {
+            color: #4A3F55 !important;
+        }
+        
+        [data-baseweb="calendar"] [role="gridcell"]:hover {
+            background: rgba(212, 191, 255, 0.3) !important;
+        }
+        
+        /* Valgt dato i kalender */
+        [data-baseweb="calendar"] [aria-selected="true"],
+        [data-baseweb="calendar"] [data-highlighted="true"] {
+            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
+            color: white !important;
+        }
+        
+        /* Dato range highlight */
+        [data-baseweb="calendar"] [data-in-range="true"] {
+            background: rgba(155, 126, 189, 0.2) !important;
+        }
+        
+        /* Kalender navigation pile */
+        [data-baseweb="calendar"] svg {
+            fill: #9B7EBD !important;
+        }
+        
+        /* Ugedage headers */
+        [data-baseweb="calendar"] [role="columnheader"] {
+            color: #9B7EBD !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Fjern rød fra kalender */
+        [data-baseweb="calendar"] [style*="rgb(255, 75, 75)"],
+        [data-baseweb="calendar"] [style*="#ff4b4b"] {
+            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
         }
         
         /* Metric cards styling */
