@@ -628,31 +628,39 @@ with st.expander("Filtrér", expanded=True):
     
     sel_countries = st.session_state.selected_countries
     
+    # Tjek om sammenligning er mulig (kun hvis ALLE kampagner, emails og A/B er valgt)
+    has_campaign_filter = len(sel_id_campaigns) < len(all_id_campaigns)
+    has_email_filter = len(sel_email_messages) < len(all_email_messages)
+    has_variant_filter = len(sel_variants) < len(all_variants_with_nan)
+    can_compare = not (has_campaign_filter or has_email_filter or has_variant_filter)
+    
     # Sammenlignings-tekst inde i filter-boksen
-    st.caption(f"Sammenlignet med: {prev_start_date} - {prev_end_date}")
+    if can_compare:
+        st.caption(f"Sammenlignet med: {prev_start_date} - {prev_end_date}")
+    else:
+        st.caption("⚠️ Sammenligning ikke mulig når kampagne, email eller A/B filter er aktiv")
 
 
 # --- DATA FILTRERING OG AGGREGERING ---
-def filter_data(dataset, start, end):
+
+def filter_data(dataset, start, end, for_comparison=False):
     mask = (dataset['Date'] >= pd.to_datetime(start)) & (dataset['Date'] <= pd.to_datetime(end))
     temp_df = dataset.loc[mask].copy()
     
-    # Anvend filtre baseret på brugerens valg
-    # Land
+    # Land filter bruges altid
     if sel_countries:
         temp_df = temp_df[temp_df['Country'].isin(sel_countries)]
     
-    # Kampagner
-    if sel_id_campaigns:
-        temp_df = temp_df[temp_df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
-    
-    # Emails
-    if sel_email_messages:
-        temp_df = temp_df[temp_df['Email_Message'].astype(str).isin(sel_email_messages)]
-    
-    # Variants
-    if sel_variants:
-        temp_df = temp_df[temp_df['Variant'].astype(str).isin(sel_variants)]
+    # Kampagne/Email/Variant filtre bruges KUN for visning, IKKE for sammenligning
+    if not for_comparison:
+        if sel_id_campaigns:
+            temp_df = temp_df[temp_df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
+        
+        if sel_email_messages:
+            temp_df = temp_df[temp_df['Email_Message'].astype(str).isin(sel_email_messages)]
+        
+        if sel_variants:
+            temp_df = temp_df[temp_df['Variant'].astype(str).isin(sel_variants)]
     
     # Aggreger data på tværs af lande
     # Gruppér på Date, Campaign, Email, Variant og summer metrics
@@ -679,21 +687,18 @@ def filter_data(dataset, start, end):
         
     return temp_df
 
-current_df = filter_data(df, start_date, end_date)
-prev_df = filter_data(df, prev_start_date, prev_end_date)
+current_df = filter_data(df, start_date, end_date, for_comparison=False)
+# Kun hent prev_df hvis sammenligning er mulig
+if can_compare:
+    prev_df = filter_data(df, prev_start_date, prev_end_date, for_comparison=True)
+else:
+    prev_df = pd.DataFrame()  # Tom DataFrame når sammenligning ikke er mulig
 
 
 # --- VISUALISERING ---
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-def show_metric(col, label, current_val, prev_val, format_str, is_percent=False):
-    # Beregn absolut og procentuel ændring
-    absolute_delta = current_val - prev_val
-    if prev_val > 0:
-        pct_change = ((current_val - prev_val) / prev_val) * 100
-    else:
-        pct_change = 0
-    
+def show_metric(col, label, current_val, prev_val, format_str, is_percent=False, show_delta=True):
     # Formater hovedværdi
     if is_percent:
         val_fmt = f"{current_val:.1f}%"
@@ -705,6 +710,18 @@ def show_metric(col, label, current_val, prev_val, format_str, is_percent=False)
             val_fmt = f"{current_val / 1_000:.0f}K"
         else:
             val_fmt = f"{current_val:.0f}"
+    
+    # Hvis ingen sammenligning, vis kun værdi uden delta
+    if not show_delta:
+        col.metric(label, val_fmt)
+        return
+    
+    # Beregn absolut og procentuel ændring
+    absolute_delta = current_val - prev_val
+    if prev_val > 0:
+        pct_change = ((current_val - prev_val) / prev_val) * 100
+    else:
+        pct_change = 0
     
     # Delta: kompakt absolut tal + procent i parentes
     if is_percent:
@@ -734,25 +751,29 @@ def show_metric(col, label, current_val, prev_val, format_str, is_percent=False)
     col.metric(label, val_fmt, delta=delta_fmt)
 
 cur_sent = current_df['Total_Received'].sum()
-prev_sent = prev_df['Total_Received'].sum()
 cur_opens = current_df['Unique_Opens'].sum()
-prev_opens = prev_df['Unique_Opens'].sum()
 cur_clicks = current_df['Unique_Clicks'].sum()
-prev_clicks = prev_df['Unique_Clicks'].sum()
 cur_or = current_df['Open Rate %'].mean() if not current_df.empty else 0
-prev_or = prev_df['Open Rate %'].mean() if not prev_df.empty else 0
 cur_cr = current_df['Click Rate %'].mean() if not current_df.empty else 0
-prev_cr = prev_df['Click Rate %'].mean() if not prev_df.empty else 0
-# Click Through Rate = Clicks / Opens * 100
 cur_ctr = (cur_clicks / cur_opens * 100) if cur_opens > 0 else 0
-prev_ctr = (prev_clicks / prev_opens * 100) if prev_opens > 0 else 0
 
-show_metric(col1, "Emails Sendt", cur_sent, prev_sent, "{:,.0f}")
-show_metric(col2, "Unikke Opens", cur_opens, prev_opens, "{:,.0f}")
-show_metric(col3, "Unikke Clicks", cur_clicks, prev_clicks, "{:,.0f}")
-show_metric(col4, "Open Rate", cur_or, prev_or, "{:.1f}%", is_percent=True)
-show_metric(col5, "Click Rate", cur_cr, prev_cr, "{:.2f}%", is_percent=True)
-show_metric(col6, "Click Through Rate", cur_ctr, prev_ctr, "{:.1f}%", is_percent=True)
+# Kun beregn prev-værdier hvis sammenligning er mulig
+if can_compare and not prev_df.empty:
+    prev_sent = prev_df['Total_Received'].sum()
+    prev_opens = prev_df['Unique_Opens'].sum()
+    prev_clicks = prev_df['Unique_Clicks'].sum()
+    prev_or = prev_df['Open Rate %'].mean()
+    prev_cr = prev_df['Click Rate %'].mean()
+    prev_ctr = (prev_clicks / prev_opens * 100) if prev_opens > 0 else 0
+else:
+    prev_sent = prev_opens = prev_clicks = prev_or = prev_cr = prev_ctr = 0
+
+show_metric(col1, "Emails Sendt", cur_sent, prev_sent, "{:,.0f}", show_delta=can_compare)
+show_metric(col2, "Unikke Opens", cur_opens, prev_opens, "{:,.0f}", show_delta=can_compare)
+show_metric(col3, "Unikke Clicks", cur_clicks, prev_clicks, "{:,.0f}", show_delta=can_compare)
+show_metric(col4, "Open Rate", cur_or, prev_or, "{:.1f}%", is_percent=True, show_delta=can_compare)
+show_metric(col5, "Click Rate", cur_cr, prev_cr, "{:.2f}%", is_percent=True, show_delta=can_compare)
+show_metric(col6, "Click Through Rate", cur_ctr, prev_ctr, "{:.1f}%", is_percent=True, show_delta=can_compare)
 
 st.divider()
 
