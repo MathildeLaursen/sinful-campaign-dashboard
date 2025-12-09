@@ -369,10 +369,6 @@ with st.expander("Filtrér", expanded=True):
         with e2:
             end_date = st.date_input("Slut dato", default_end, label_visibility="collapsed")
 
-    delta = end_date - start_date
-    prev_end_date = start_date - datetime.timedelta(days=1)
-    prev_start_date = prev_end_date - delta
-
     # Række 2: Filtre (Vandret layout) - KASKADERENDE
     
     # Filtrer først efter dato - så dropdowns kun viser data fra valgt periode
@@ -390,7 +386,6 @@ with st.expander("Filtrér", expanded=True):
         # Nulstil alle filtre når perioden ændres
         st.session_state.selected_campaigns = []
         st.session_state.selected_emails = []
-        st.session_state.selected_variants = []
         st.session_state.selected_countries = []
     
     # Initialize session states
@@ -398,16 +393,12 @@ with st.expander("Filtrér", expanded=True):
         st.session_state.selected_campaigns = []
     if 'selected_emails' not in st.session_state:
         st.session_state.selected_emails = []
-    if 'selected_variants' not in st.session_state:
-        st.session_state.selected_variants = []
     if 'selected_countries' not in st.session_state:
         st.session_state.selected_countries = []
     if 'search_campaign' not in st.session_state:
         st.session_state.search_campaign = ""
     if 'search_email' not in st.session_state:
         st.session_state.search_email = ""
-    if 'search_variant' not in st.session_state:
-        st.session_state.search_variant = ""
     if 'search_country' not in st.session_state:
         st.session_state.search_country = ""
     
@@ -445,8 +436,8 @@ with st.expander("Filtrér", expanded=True):
     if not st.session_state.selected_campaigns:
         st.session_state.selected_campaigns = list(all_id_campaigns)
     
-    # Række 2: Land, Kampagne, Email, A/B (land først for at påvirke kampagner)
-    col_land, col_kamp, col_email, col_ab = st.columns(4)
+    # Række 2: Land, Kampagne, Email (land først for at påvirke kampagner)
+    col_land, col_kamp, col_email = st.columns(3)
     
     # Land filter først
     with col_land:
@@ -583,119 +574,29 @@ with st.expander("Filtrér", expanded=True):
                             st.session_state.selected_emails.remove(email)
     
     sel_email_messages = st.session_state.selected_emails
-    
-    # A/B filter (afhængig af valgt email, kampagne, land OG dato)
-    # Filtrer på emails hvis ikke alle er valgt
-    if len(st.session_state.selected_emails) < len(all_email_messages):
-        filtered_for_variant = filtered_for_email[filtered_for_email['Email_Message'].astype(str).isin(sel_email_messages)]
-    else:
-        filtered_for_variant = filtered_for_email
-    
-    # Inkluder alle variants, men map "nan" til pæn visning
-    all_variants_raw = filtered_for_variant['Variant'].astype(str).unique()
-    all_variants_with_nan = sorted(all_variants_raw)
-    
-    # Map nan til visning
-    def display_variant(v):
-        if v.lower() == 'nan':
-            return "(Ingen)"
-        return v
-    
-    # Pre-select alle variants hvis tom
-    if not st.session_state.selected_variants:
-        st.session_state.selected_variants = list(all_variants_with_nan)
-    
-    # Synkroniser: fjern variants der ikke findes i filtreret data
-    st.session_state.selected_variants = [v for v in st.session_state.selected_variants if v in all_variants_with_nan]
-    
-    # Hvis alle variants blev fjernet, vælg alle igen
-    if not st.session_state.selected_variants:
-        st.session_state.selected_variants = list(all_variants_with_nan)
-    
-    with col_ab:
-        ab1, ab2 = st.columns(ratio_col3)
-        with ab1:
-            st.markdown("<p style='margin-top: 8px; font-size: 14px; font-weight: bold;'>A/B</p>", unsafe_allow_html=True)
-        with ab2:
-            count_text = f"{len(st.session_state.selected_variants)} valgt" if st.session_state.selected_variants else "Alle"
-            with st.popover(count_text, use_container_width=True):
-                # Select All checkbox
-                all_selected = len(st.session_state.selected_variants) == len(all_variants_with_nan)
-                if st.checkbox("Select All", value=all_selected, key="select_all_variants_cb"):
-                    if not all_selected:
-                        st.session_state.selected_variants = list(all_variants_with_nan)
-                        st.rerun()
-                else:
-                    if all_selected:
-                        st.session_state.selected_variants = []
-                        st.rerun()
-                
-                # Search box
-                search_term = st.text_input("🔍 Type to search", key="search_variant", label_visibility="collapsed", placeholder="Type to search")
-                
-                # Reduceret spacing (30% af normal)
-                st.markdown("<div style='margin-top: -0.7rem;'></div>", unsafe_allow_html=True)
-                
-                # Filter variants by search
-                filtered_variants = [v for v in all_variants_with_nan if search_term.lower() in display_variant(v).lower()] if search_term else all_variants_with_nan
-                
-                # Checkboxes for variants
-                for variant in filtered_variants:
-                    display_label = display_variant(variant)
-                    is_selected = variant in st.session_state.selected_variants
-                    if st.checkbox(display_label, value=is_selected, key=f"variant_{variant}"):
-                        if variant not in st.session_state.selected_variants:
-                            st.session_state.selected_variants.append(variant)
-                    else:
-                        if variant in st.session_state.selected_variants:
-                            st.session_state.selected_variants.remove(variant)
-    
-    # Hvis ingen variants er valgt manuelt, brug alle (inkl nan)
-    if not st.session_state.selected_variants:
-        sel_variants = all_variants_with_nan
-    else:
-        sel_variants = st.session_state.selected_variants
-    
     sel_countries = st.session_state.selected_countries
-    
-    # Tjek om sammenligning er mulig (kun hvis ALLE kampagner, emails og A/B er valgt)
-    has_campaign_filter = len(sel_id_campaigns) < len(all_id_campaigns)
-    has_email_filter = len(sel_email_messages) < len(all_email_messages)
-    has_variant_filter = len(sel_variants) < len(all_variants_with_nan)
-    can_compare = not (has_campaign_filter or has_email_filter or has_variant_filter)
-    
-    # Sammenlignings-tekst inde i filter-boksen
-    if can_compare:
-        st.caption(f"Sammenlignet med: {prev_start_date} - {prev_end_date}")
-    else:
-        st.caption("⚠️ Sammenligning ikke mulig når kampagne, email eller A/B filter er aktiv")
 
 
 # --- DATA FILTRERING OG AGGREGERING ---
 
-def filter_data(dataset, start, end, for_comparison=False):
+def filter_data(dataset, start, end):
     mask = (dataset['Date'] >= pd.to_datetime(start)) & (dataset['Date'] <= pd.to_datetime(end))
     temp_df = dataset.loc[mask].copy()
     
-    # Land filter bruges altid
+    # Anvend filtre
     if sel_countries:
         temp_df = temp_df[temp_df['Country'].isin(sel_countries)]
     
-    # Kampagne/Email/Variant filtre bruges KUN for visning, IKKE for sammenligning
-    if not for_comparison:
-        if sel_id_campaigns:
-            temp_df = temp_df[temp_df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
-        
-        if sel_email_messages:
-            temp_df = temp_df[temp_df['Email_Message'].astype(str).isin(sel_email_messages)]
-        
-        if sel_variants:
-            temp_df = temp_df[temp_df['Variant'].astype(str).isin(sel_variants)]
+    if sel_id_campaigns:
+        temp_df = temp_df[temp_df['ID_Campaign'].astype(str).isin(sel_id_campaigns)]
+    
+    if sel_email_messages:
+        temp_df = temp_df[temp_df['Email_Message'].astype(str).isin(sel_email_messages)]
     
     # Aggreger data på tværs af lande
-    # Gruppér på Date, Campaign, Email, Variant og summer metrics
+    # Gruppér på Date, Campaign, Email og summer metrics
     if not temp_df.empty:
-        agg_df = temp_df.groupby(['Date', 'ID_Campaign', 'Email_Message', 'Variant'], as_index=False).agg({
+        agg_df = temp_df.groupby(['Date', 'ID_Campaign', 'Email_Message'], as_index=False).agg({
             'Total_Received': 'sum',
             'Unique_Opens': 'sum',
             'Unique_Clicks': 'sum',
@@ -717,18 +618,13 @@ def filter_data(dataset, start, end, for_comparison=False):
         
     return temp_df
 
-current_df = filter_data(df, start_date, end_date, for_comparison=False)
-# Kun hent prev_df hvis sammenligning er mulig
-if can_compare:
-    prev_df = filter_data(df, prev_start_date, prev_end_date, for_comparison=True)
-else:
-    prev_df = pd.DataFrame()  # Tom DataFrame når sammenligning ikke er mulig
+current_df = filter_data(df, start_date, end_date)
 
 
 # --- VISUALISERING ---
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-def show_metric(col, label, current_val, prev_val, format_str, is_percent=False, show_delta=True):
+def show_metric(col, label, current_val, is_percent=False):
     # Formater hovedværdi
     if is_percent:
         val_fmt = f"{current_val:.1f}%"
@@ -741,69 +637,21 @@ def show_metric(col, label, current_val, prev_val, format_str, is_percent=False,
         else:
             val_fmt = f"{current_val:.0f}"
     
-    # Hvis ingen sammenligning, vis kun værdi uden delta
-    if not show_delta:
-        col.metric(label, val_fmt)
-        return
-    
-    # Beregn absolut og procentuel ændring
-    absolute_delta = current_val - prev_val
-    if prev_val > 0:
-        pct_change = ((current_val - prev_val) / prev_val) * 100
-    else:
-        pct_change = 0
-    
-    # Delta: kompakt absolut tal + procent i parentes
-    if is_percent:
-        # For procent-metrics: kun procent-ændring
-        if pct_change >= 0:
-            delta_fmt = f"+{pct_change:.1f}%"
-        else:
-            delta_fmt = f"{pct_change:.1f}%"
-    else:
-        # For tal-metrics: absolut (kompakt) + procent i parentes
-        if absolute_delta >= 1_000_000:
-            abs_fmt = f"{absolute_delta / 1_000_000:.1f}M"
-        elif absolute_delta >= 1_000:
-            abs_fmt = f"{absolute_delta / 1_000:.0f}K"
-        elif absolute_delta <= -1_000_000:
-            abs_fmt = f"{absolute_delta / 1_000_000:.1f}M"
-        elif absolute_delta <= -1_000:
-            abs_fmt = f"{absolute_delta / 1_000:.0f}K"
-        else:
-            abs_fmt = f"{absolute_delta:.0f}"
-        
-        if absolute_delta >= 0:
-            delta_fmt = f"+{abs_fmt} (+{pct_change:.1f}%)"
-        else:
-            delta_fmt = f"{abs_fmt} ({pct_change:.1f}%)"
+    col.metric(label, val_fmt)
 
-    col.metric(label, val_fmt, delta=delta_fmt)
-
-cur_sent = current_df['Total_Received'].sum()
-cur_opens = current_df['Unique_Opens'].sum()
-cur_clicks = current_df['Unique_Clicks'].sum()
+cur_sent = current_df['Total_Received'].sum() if not current_df.empty else 0
+cur_opens = current_df['Unique_Opens'].sum() if not current_df.empty else 0
+cur_clicks = current_df['Unique_Clicks'].sum() if not current_df.empty else 0
 cur_or = current_df['Open Rate %'].mean() if not current_df.empty else 0
 cur_cr = current_df['Click Rate %'].mean() if not current_df.empty else 0
 cur_ctr = (cur_clicks / cur_opens * 100) if cur_opens > 0 else 0
 
-# Kun beregn prev-værdier hvis sammenligning er mulig
-if can_compare and not prev_df.empty:
-    prev_sent = prev_df['Total_Received'].sum()
-    prev_opens = prev_df['Unique_Opens'].sum()
-    prev_clicks = prev_df['Unique_Clicks'].sum()
-    prev_or = prev_df['Open Rate %'].mean()
-    prev_cr = prev_df['Click Rate %'].mean()
-    prev_ctr = (prev_clicks / prev_opens * 100) if prev_opens > 0 else 0
-else:
-    prev_sent = prev_opens = prev_clicks = prev_or = prev_cr = prev_ctr = 0
-
-show_metric(col1, "Emails Sendt", cur_sent, prev_sent, "{:,.0f}", show_delta=can_compare)
-show_metric(col2, "Unikke Opens", cur_opens, prev_opens, "{:,.0f}", show_delta=can_compare)
-show_metric(col3, "Unikke Clicks", cur_clicks, prev_clicks, "{:,.0f}", show_delta=can_compare)
-show_metric(col4, "Open Rate", cur_or, prev_or, "{:.1f}%", is_percent=True, show_delta=can_compare)
-show_metric(col5, "Click Rate", cur_cr, prev_cr, "{:.2f}%", is_percent=True, show_delta=can_compare)
-show_metric(col6, "Click Through Rate", cur_ctr, prev_ctr, "{:.1f}%", is_percent=True, show_delta=can_compare)
+show_metric(col1, "Emails Sendt", cur_sent)
+show_metric(col2, "Unikke Opens", cur_opens)
+show_metric(col3, "Unikke Clicks", cur_clicks)
+show_metric(col4, "Open Rate", cur_or, is_percent=True)
+show_metric(col5, "Click Rate", cur_cr, is_percent=True)
+show_metric(col6, "Click Through Rate", cur_ctr, is_percent=True)
 
 st.divider()
 
@@ -857,7 +705,7 @@ else:
 if not current_df.empty:
     display_df = current_df.copy()
     display_df['Date'] = display_df['Date'].dt.date
-    cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Variant', 'Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %', 'Click Through Rate %']
+    cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %', 'Click Through Rate %']
     st.dataframe(
         display_df[cols_to_show].sort_values(by='Date', ascending=False),
         use_container_width=True,
@@ -866,7 +714,6 @@ if not current_df.empty:
             "Date": st.column_config.DateColumn("Date", width="small"),
             "ID_Campaign": st.column_config.TextColumn("Kampagne", width="medium"),
             "Email_Message": st.column_config.TextColumn("Email", width="large"),
-            "Variant": st.column_config.TextColumn("A/B", width="small"),
             "Total_Received": st.column_config.NumberColumn("Emails Sendt", format="%d", width="small"),
             "Unique_Opens": st.column_config.NumberColumn("Unikke Opens", format="%d", width="small"),
             "Unique_Clicks": st.column_config.NumberColumn("Unikke Clicks", format="%d", width="small"),
