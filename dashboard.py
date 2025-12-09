@@ -227,7 +227,7 @@ except Exception as e:
 # --- TOP-BAR: FILTRE & DATO (COLLAPSIBLE) ---
 
 # Vi bruger st.expander til at lave en boks der kan foldes ud/ind
-with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=TRUE):
+with st.expander("🔍 Tilpas Dashboard (Dato & Filtre)", expanded=True):
     
     # Række 1: Datovælger
     date_options = [
@@ -814,6 +814,7 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
