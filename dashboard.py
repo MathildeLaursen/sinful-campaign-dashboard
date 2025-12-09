@@ -158,56 +158,56 @@ st.markdown("""
             padding: 0.3rem 0.5rem !important;
             border-radius: 6px !important;
             transition: background 0.2s ease !important;
+            background: transparent !important;
         }
         
         .stCheckbox > label:hover {
-            background: rgba(212, 191, 255, 0.15) !important;
+            background: rgba(232, 180, 203, 0.1) !important;
         }
         
-        /* Checkbox box styling */
-        .stCheckbox > label > span:first-child,
-        .stCheckbox [data-testid="stCheckbox"] > span:first-child,
-        [data-testid="stCheckbox"] svg {
-            border-color: #D4BFFF !important;
+        /* Fjern text highlight/selection styling */
+        .stCheckbox > label > span:last-child,
+        .stCheckbox p,
+        .stCheckbox span {
+            background: transparent !important;
+            background-color: transparent !important;
+            color: #4A3F55 !important;
         }
         
-        /* Checked state - unicorn gradient */
-        .stCheckbox > label > span:first-child[data-checked="true"],
-        [data-testid="stCheckbox"] input:checked + div {
-            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
-            border-color: #9B7EBD !important;
+        /* Checkbox box styling - pastel pink */
+        .stCheckbox > label > div:first-child,
+        .stCheckbox [data-testid="stCheckbox"] > div:first-child,
+        [data-baseweb="checkbox"] > div:first-child {
+            background-color: #F8C8DC !important;
+            border-color: #E8B4CB !important;
         }
         
-        /* Fjern rød farve fra alle checkboxes */
+        /* Checkbox checkmark */
         .stCheckbox svg,
-        [data-testid="stCheckbox"] svg {
-            fill: #9B7EBD !important;
-            stroke: #9B7EBD !important;
+        [data-testid="stCheckbox"] svg,
+        [data-baseweb="checkbox"] svg {
+            fill: white !important;
+            stroke: white !important;
         }
         
-        /* Override alle røde farver til unicorn lilla */
+        /* Override røde farver til pastel pink */
         .stCheckbox [style*="rgb(255, 75, 75)"],
         .stCheckbox [style*="#ff4b4b"],
         [data-testid="stCheckbox"] [style*="rgb(255, 75, 75)"],
-        [data-testid="stCheckbox"] [style*="#ff4b4b"] {
-            background-color: #9B7EBD !important;
-            border-color: #9B7EBD !important;
+        [data-testid="stCheckbox"] [style*="#ff4b4b"],
+        [data-baseweb="checkbox"] [style*="rgb(255, 75, 75)"],
+        [data-baseweb="checkbox"] [style*="#ff4b4b"] {
+            background-color: #F8C8DC !important;
+            border-color: #E8B4CB !important;
         }
         
-        /* Checkbox checked background override */
-        .st-emotion-cache-1inwz65,
-        .st-emotion-cache-16idsys,
-        [data-baseweb="checkbox"] [data-testid="stMarkdownContainer"],
-        .stCheckbox > div > label > div:first-child {
-            background-color: #9B7EBD !important;
-        }
-        
-        /* Force lilla på alle checked checkboxes */
+        /* Force pastel pink på alle checked checkboxes */
         input[type="checkbox"]:checked + div,
         input[type="checkbox"]:checked ~ div,
-        .stCheckbox input:checked + div {
-            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
-            background-color: #9B7EBD !important;
+        .stCheckbox input:checked + div,
+        [data-baseweb="checkbox"] input:checked + div {
+            background-color: #F8C8DC !important;
+            border-color: #E8B4CB !important;
         }
         
         /* Små knapper i popover */
