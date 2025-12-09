@@ -167,15 +167,42 @@ st.markdown("""
             background: rgba(232, 180, 203, 0.1) !important;
         }
         
-        /* Ensartet spacing mellem checkboxes */
-        .stCheckbox {
-            margin-bottom: 0.1rem !important;
+        /* Ensartet spacing mellem checkboxes i popover */
+        [data-testid="stPopover"] .stElementContainer {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
         }
         
-        /* Tekst ved siden af checkbox */
-        .stCheckbox label > div:last-child {
+        [data-testid="stPopover"] .stCheckbox {
+            margin-bottom: 0 !important;
+        }
+        
+        [data-testid="stPopover"] .row-widget.stCheckbox {
+            margin-bottom: 0.2rem !important;
+        }
+        
+        /* Tekst ved siden af checkbox - vertikal centrering */
+        .stCheckbox label > div:last-child,
+        label[data-baseweb="checkbox"] > div.st-dy {
             display: flex !important;
             align-items: center !important;
+            padding-top: 0 !important;
+        }
+        
+        /* Checkbox label PRÆCIS alignment */
+        label[data-baseweb="checkbox"] {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        
+        /* Checkbox boks størrelse og alignment */
+        label[data-baseweb="checkbox"] > span:first-child {
+            flex-shrink: 0 !important;
+            width: 18px !important;
+            height: 18px !important;
+            min-width: 18px !important;
+            min-height: 18px !important;
         }
         
         /* FJERN TEKST HIGHLIGHT - meget aggressiv */
