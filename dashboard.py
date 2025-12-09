@@ -1,7 +1,6 @@
 
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 from streamlit_gsheets import GSheetsConnection
 import extra_streamlit_components as stx
 import datetime
@@ -654,53 +653,6 @@ show_metric(col5, "Click Rate", cur_cr, is_percent=True)
 show_metric(col6, "Click Through Rate", cur_ctr, is_percent=True)
 
 st.divider()
-
-if not current_df.empty:
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-    
-    graph_df = current_df.sort_values('Date')
-    
-    # Dual y-axis plot
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    
-    # Open Rate (venstre y-akse) - Blå
-    fig.add_trace(
-        go.Scatter(
-            x=graph_df['Date'], 
-            y=graph_df['Open Rate %'],
-            name='Open Rate',
-            marker=dict(color='#2E86AB', size=8),
-            mode='markers'
-        ),
-        secondary_y=False
-    )
-    
-    # Click Rate (højre y-akse) - Grøn
-    fig.add_trace(
-        go.Scatter(
-            x=graph_df['Date'], 
-            y=graph_df['Click Rate %'],
-            name='Click Rate',
-            marker=dict(color='#28A745', size=8),
-            mode='markers'
-        ),
-        secondary_y=True
-    )
-    
-    # Akse-titler
-    fig.update_yaxes(title_text="Open Rate", secondary_y=False)
-    fig.update_yaxes(title_text="Click Rate", secondary_y=True)
-    fig.update_xaxes(title_text="")
-    
-    fig.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        hovermode='x unified'
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Ingen data i valgte periode.")
 
 if not current_df.empty:
     display_df = current_df.copy()
