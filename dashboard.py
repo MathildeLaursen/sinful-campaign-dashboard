@@ -418,6 +418,9 @@ with col_email:
                 if email in st.session_state.selected_emails:
                     st.session_state.selected_emails.remove(email)
 
+sel_id_campaigns = st.session_state.selected_campaigns
+sel_email_messages = st.session_state.selected_emails
+sel_countries = st.session_state.selected_countries
 
 
 # --- DATA FILTRERING OG AGGREGERING ---
@@ -547,6 +550,7 @@ else:
 if st.button('Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
