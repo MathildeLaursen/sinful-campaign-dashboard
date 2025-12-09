@@ -561,19 +561,19 @@ if not current_df.empty:
     
     st.dataframe(
         sorted_df,
-        use_container_width=False,
+        use_container_width=True,
         hide_index=True,
         height=table_height,
         column_config={
-            "Date": st.column_config.DateColumn("Date", width="small"),
-            "ID_Campaign": st.column_config.TextColumn("Kampagne", width="medium"),
-            "Email_Message": st.column_config.TextColumn("Email", width="large"),
-            "Total_Received": st.column_config.NumberColumn("Emails Sendt", format="localized", width="small"),
-            "Unique_Opens": st.column_config.NumberColumn("Unikke Opens", format="localized", width="small"),
-            "Unique_Clicks": st.column_config.NumberColumn("Unikke Clicks", format="localized", width="small"),
-            "Open Rate %": st.column_config.NumberColumn("Open Rate", format="%.1f%%", width="small"),
-            "Click Rate %": st.column_config.NumberColumn("Click Rate", format="%.1f%%", width="small"),
-            "Click Through Rate %": st.column_config.NumberColumn("CTR", format="%.1f%%", width="small"),
+            "Date": st.column_config.DateColumn("Date", width=90),
+            "ID_Campaign": st.column_config.TextColumn("Kampagne"),
+            "Email_Message": st.column_config.TextColumn("Email"),
+            "Total_Received": st.column_config.NumberColumn("Emails Sendt", format="localized", width=95),
+            "Unique_Opens": st.column_config.NumberColumn("Unikke Opens", format="localized", width=95),
+            "Unique_Clicks": st.column_config.NumberColumn("Unikke Clicks", format="localized", width=95),
+            "Open Rate %": st.column_config.NumberColumn("Open Rate", format="%.1f%%", width=80),
+            "Click Rate %": st.column_config.NumberColumn("Click Rate", format="%.1f%%", width=80),
+            "Click Through Rate %": st.column_config.NumberColumn("CTR", format="%.1f%%", width=60),
         }
     )
 else:
