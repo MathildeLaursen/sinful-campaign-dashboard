@@ -744,7 +744,7 @@ if not current_df.empty:
         hide_index=True,
         height=table_height,
         column_config={
-            "Date": st.column_config.DateColumn("Date", width="small"),
+            "Date": st.column_config.DateColumn("Dato", width="small"),
             "ID_Campaign": st.column_config.TextColumn("Kampagne", width="medium"),
             "Email_Message": st.column_config.TextColumn("Email", width="large"),
             "Total_Received": st.column_config.NumberColumn("Sendt", format="localized", width="small"),
