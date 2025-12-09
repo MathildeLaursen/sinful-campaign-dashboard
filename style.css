@@ -158,21 +158,29 @@ button[data-testid="stPopoverButton"] p {
 }
 
 /* Popover dropdown indhold */
-[data-testid="stPopover"] {
+[data-testid="stPopover"] .st-cy {
     background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
     border: 1px solid #D4BFFF !important;
     border-radius: 12px !important;
     box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
 }
 
+/* Fjern alle ekstra baggrunde/borders i popover */
+[data-testid="stPopover"] .st-cy *,
+[data-testid="stPopover"] .stVerticalBlock,
+[data-testid="stPopover"] .stElementContainer,
+[data-testid="stPopover"] .stCheckbox,
+[data-testid="stPopover"] > div {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 /* Ensartet spacing mellem checkboxes i popover */
 [data-testid="stPopover"] .stElementContainer {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
-}
-
-[data-testid="stPopover"] .stCheckbox {
-    margin-bottom: 0 !important;
 }
 
 [data-testid="stPopover"] .row-widget.stCheckbox {
@@ -195,12 +203,12 @@ button[data-testid="stPopoverButton"] p {
 /* Søgefelt i popover */
 [data-testid="stPopover"] .stTextInput input {
     background: rgba(255,255,255,0.9) !important;
-    border-color: #D4BFFF !important;
+    border: 1px solid #D4BFFF !important;
     border-radius: 8px !important;
 }
 
 [data-testid="stPopover"] .stTextInput input:focus {
-    border-color: #9B7EBD !important;
+    border: 1px solid #9B7EBD !important;
     box-shadow: 0 0 0 2px rgba(155, 126, 189, 0.2) !important;
 }
 
