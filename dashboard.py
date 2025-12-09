@@ -455,6 +455,13 @@ if 'search_email' not in st.session_state:
     st.session_state.search_email = ""
 if 'search_country' not in st.session_state:
     st.session_state.search_country = ""
+# Counter til at resette checkbox keys
+if 'cb_reset_land' not in st.session_state:
+    st.session_state.cb_reset_land = 0
+if 'cb_reset_kamp' not in st.session_state:
+    st.session_state.cb_reset_kamp = 0
+if 'cb_reset_email' not in st.session_state:
+    st.session_state.cb_reset_email = 0
 
 if period_changed:
     st.session_state.last_period_key = current_period_key
@@ -494,16 +501,19 @@ with col_land:
         with btn_col1:
             if st.button("✓ Alle", key="sel_all_land", use_container_width=True):
                 st.session_state.selected_countries = list(all_countries)
+                st.session_state.cb_reset_land += 1
                 st.rerun()
         with btn_col2:
             if st.button("✗ Ingen", key="desel_all_land", use_container_width=True):
                 st.session_state.selected_countries = []
+                st.session_state.cb_reset_land += 1
                 st.rerun()
         
         st.markdown("---")
+        reset_land = st.session_state.cb_reset_land
         for country in all_countries:
             checked = country in st.session_state.selected_countries
-            if st.checkbox(country, value=checked, key=f"cb_land_{country}"):
+            if st.checkbox(country, value=checked, key=f"cb_land_{country}_{reset_land}"):
                 if country not in st.session_state.selected_countries:
                     st.session_state.selected_countries.append(country)
             else:
@@ -520,19 +530,22 @@ with col_kamp:
         with btn_col1:
             if st.button("✓ Alle", key="sel_all_kamp", use_container_width=True):
                 st.session_state.selected_campaigns = list(all_id_campaigns)
+                st.session_state.cb_reset_kamp += 1
                 st.rerun()
         with btn_col2:
             if st.button("✗ Ingen", key="desel_all_kamp", use_container_width=True):
                 st.session_state.selected_campaigns = []
+                st.session_state.cb_reset_kamp += 1
                 st.rerun()
         
         st.markdown("---")
         search_kamp = st.text_input("🔍 Søg", key="search_kamp", placeholder="Søg kampagne...")
         filtered_campaigns = [c for c in all_id_campaigns if search_kamp.lower() in c.lower()] if search_kamp else all_id_campaigns
         
+        reset_kamp = st.session_state.cb_reset_kamp
         for campaign in filtered_campaigns:
             checked = campaign in st.session_state.selected_campaigns
-            if st.checkbox(campaign, value=checked, key=f"cb_kamp_{campaign}"):
+            if st.checkbox(campaign, value=checked, key=f"cb_kamp_{campaign}_{reset_kamp}"):
                 if campaign not in st.session_state.selected_campaigns:
                     st.session_state.selected_campaigns.append(campaign)
             else:
@@ -549,19 +562,22 @@ with col_email:
         with btn_col1:
             if st.button("✓ Alle", key="sel_all_email", use_container_width=True):
                 st.session_state.selected_emails = list(all_email_messages)
+                st.session_state.cb_reset_email += 1
                 st.rerun()
         with btn_col2:
             if st.button("✗ Ingen", key="desel_all_email", use_container_width=True):
                 st.session_state.selected_emails = []
+                st.session_state.cb_reset_email += 1
                 st.rerun()
         
         st.markdown("---")
         search_email = st.text_input("🔍 Søg", key="search_email_input", placeholder="Søg email...")
         filtered_emails = [e for e in all_email_messages if search_email.lower() in e.lower()] if search_email else all_email_messages
         
+        reset_email = st.session_state.cb_reset_email
         for email in filtered_emails:
             checked = email in st.session_state.selected_emails
-            if st.checkbox(email, value=checked, key=f"cb_email_{email}"):
+            if st.checkbox(email, value=checked, key=f"cb_email_{email}_{reset_email}"):
                 if email not in st.session_state.selected_emails:
                     st.session_state.selected_emails.append(email)
             else:
