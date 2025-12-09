@@ -658,7 +658,7 @@ if not current_df.empty:
             marker_color='#9B7EBD',
             text=chart_df['Open Rate'].apply(lambda x: f'{x:.1f}%'),
             textposition='outside',
-            textfont=dict(size=10),
+            textfont=dict(size=12),
             offsetgroup=0
         ),
         secondary_y=False
@@ -673,7 +673,7 @@ if not current_df.empty:
             marker_color='#E8B4CB',
             text=chart_df['Click Rate'].apply(lambda x: f'{x:.1f}%'),
             textposition='outside',
-            textfont=dict(size=10),
+            textfont=dict(size=12),
             offsetgroup=1
         ),
         secondary_y=True
@@ -722,7 +722,8 @@ if not current_df.empty:
     fig.update_xaxes(
         gridcolor='rgba(212,191,255,0.2)',
         tickangle=-45,
-        type='category'
+        type='category',
+        tickfont=dict(size=12)
     )
     
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
