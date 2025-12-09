@@ -632,9 +632,9 @@ if not current_df.empty:
     # Lidt luft over grafen
     st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
     
-    # --- GRAF: Open Rate & Click Rate over tid ---
-    # Aggreger per dato for grafen
-    chart_df = current_df.groupby('Date', as_index=False).agg({
+    # --- GRAF: Open Rate & Click Rate per email ---
+    # Aggreger per Email_Message for grafen
+    chart_df = current_df.groupby(['Date', 'Email_Message'], as_index=False).agg({
         'Total_Received': 'sum',
         'Unique_Opens': 'sum',
         'Unique_Clicks': 'sum'
@@ -643,39 +643,44 @@ if not current_df.empty:
     chart_df['Click Rate'] = (chart_df['Unique_Clicks'] / chart_df['Total_Received'] * 100).round(2)
     chart_df = chart_df.sort_values('Date')
     
-    # Opret graf med to y-akser
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # Kort email label til grafen (kun Message del)
+    chart_df['Email_Short'] = chart_df['Email_Message'].apply(lambda x: x.split(' - ')[-1] if ' - ' in str(x) else str(x))
     
-    # Open Rate (venstre y-akse) - søjler
+    # Opret simpel bar chart (uden secondary_y for at undgå stacking)
+    fig = go.Figure()
+    
+    # Open Rate søjler
     fig.add_trace(
         go.Bar(
-            x=chart_df['Date'], 
+            x=chart_df['Email_Short'], 
             y=chart_df['Open Rate'],
             name='Open Rate',
             marker_color='#9B7EBD',
-            opacity=0.85
-        ),
-        secondary_y=False
+            text=chart_df['Open Rate'].apply(lambda x: f'{x:.1f}%'),
+            textposition='outside',
+            textfont=dict(size=10)
+        )
     )
     
-    # Click Rate (højre y-akse) - søjler
+    # Click Rate søjler
     fig.add_trace(
         go.Bar(
-            x=chart_df['Date'], 
+            x=chart_df['Email_Short'], 
             y=chart_df['Click Rate'],
             name='Click Rate',
             marker_color='#E8B4CB',
-            opacity=0.85
-        ),
-        secondary_y=True
+            text=chart_df['Click Rate'].apply(lambda x: f'{x:.1f}%'),
+            textposition='outside',
+            textfont=dict(size=10)
+        )
     )
     
     # Layout styling (unicorn theme)
     fig.update_layout(
         title="",
         showlegend=True,
-        height=300,
-        margin=dict(l=60, r=60, t=40, b=40),
+        height=350,
+        margin=dict(l=40, r=40, t=40, b=80),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -686,26 +691,21 @@ if not current_df.empty:
         plot_bgcolor='rgba(250,245,255,0.5)',
         paper_bgcolor='rgba(0,0,0,0)',
         hovermode='x unified',
-        annotations=[],
         barmode='group',
-        bargap=0.15,
+        bargap=0.3,
         bargroupgap=0.1
     )
     
-    # Y-akser styling
+    # Y-akse styling
     fig.update_yaxes(
-        title_text="Open Rate %", 
-        secondary_y=False,
+        title_text="Rate %",
         gridcolor='rgba(212,191,255,0.3)',
         ticksuffix='%'
     )
-    fig.update_yaxes(
-        title_text="Click Rate %", 
-        secondary_y=True,
-        gridcolor='rgba(232,180,203,0.3)',
-        ticksuffix='%'
+    fig.update_xaxes(
+        gridcolor='rgba(212,191,255,0.2)',
+        tickangle=-45
     )
-    fig.update_xaxes(gridcolor='rgba(212,191,255,0.2)')
     
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
     
