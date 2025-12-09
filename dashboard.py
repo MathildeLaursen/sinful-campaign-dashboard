@@ -566,7 +566,7 @@ if not current_df.empty:
         height=table_height,
         column_config={
             "Date": st.column_config.DateColumn("Date", width="small"),
-            "ID_Campaign": st.column_config.TextColumn("Kampagne", width="large"),
+            "ID_Campaign": st.column_config.TextColumn("Kampagne", width="medium"),
             "Email_Message": st.column_config.TextColumn("Email", width="large"),
             "Total_Received": st.column_config.NumberColumn("Sendt", format="localized", width="small"),
             "Unique_Opens": st.column_config.NumberColumn("Opens", format="localized", width="small"),
