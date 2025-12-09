@@ -189,26 +189,99 @@ except Exception as e:
     st.stop()
 
 
-# --- FILTRE & DATO ---
+# --- FILTRE & DATO LOGIK (Looker Style) ---
 
 today = datetime.date.today()
-default_start = today - datetime.timedelta(days=30)
-default_end = today
 
-# Alle filtre på én linje: Periode, Land, Kampagne, Email
-col_dato, col_land, col_kamp, col_email = st.columns(4)
+# Helper funktioner til dato-beregning
+def get_date_range_from_preset(preset):
+    if preset == "I dag":
+        return today, today
+    elif preset == "I går":
+        return today - datetime.timedelta(days=1), today - datetime.timedelta(days=1)
+    elif preset == "Denne uge (man-søn)":
+        start = today - datetime.timedelta(days=today.weekday())
+        return start, today
+    elif preset == "Sidste 7 dage":
+        return today - datetime.timedelta(days=7), today
+    elif preset == "Sidste 14 dage":
+        return today - datetime.timedelta(days=14), today
+    elif preset == "Sidste 30 dage":
+        return today - datetime.timedelta(days=30), today
+    elif preset == "Denne måned":
+        start = today.replace(day=1)
+        return start, today
+    elif preset == "Sidste måned":
+        first_day_this_month = today.replace(day=1)
+        last_day_last_month = first_day_this_month - datetime.timedelta(days=1)
+        start = last_day_last_month.replace(day=1)
+        return start, last_day_last_month
+    elif preset == "I år":
+        start = today.replace(month=1, day=1)
+        return start, today
+    elif preset == "Sidste år":
+        start = datetime.date(today.year - 1, 1, 1)
+        end = datetime.date(today.year - 1, 12, 31)
+        return start, end
+    return None  # Tilpasset
 
-with col_dato:
-    date_range = st.date_input(
-        "Periode",
-        value=(default_start, default_end),
+# Session state init for dato
+if 'date_range' not in st.session_state:
+    st.session_state.date_range = (today - datetime.timedelta(days=30), today)
+if 'date_preset' not in st.session_state:
+    st.session_state.date_preset = "Sidste 30 dage"
+
+# Callback: Når preset ændres (dropdown)
+def on_preset_change():
+    preset = st.session_state.date_preset
+    new_range = get_date_range_from_preset(preset)
+    if new_range:
+        st.session_state.date_range = new_range
+
+# Callback: Når dato ændres manuelt (kalender)
+def on_date_change():
+    # Hvis brugeren piller ved kalenderen, sæt preset til "Tilpasset"
+    st.session_state.date_preset = "Tilpasset"
+
+# --- VISUALISERING AF DATO VÆLGER ---
+col_preset, col_picker, col_land, col_kamp, col_email = st.columns([1.2, 1.8, 1, 1, 1])
+
+# 1. Preset Dropdown (Looker Logic)
+with col_preset:
+    presets = [
+        "Tilpasset",
+        "I dag", "I går", 
+        "Denne uge (man-søn)", 
+        "Sidste 7 dage", "Sidste 14 dage", "Sidste 30 dage", 
+        "Denne måned", "Sidste måned", 
+        "I år", "Sidste år"
+    ]
+    st.selectbox(
+        "Dato interval", 
+        options=presets,
+        key="date_preset",
+        on_change=on_preset_change,
         label_visibility="collapsed"
     )
-    # Håndter at brugeren kun har valgt én dato
+
+# 2. Den faktiske Dato Vælger
+with col_picker:
+    date_range = st.date_input(
+        "Vælg datoer",
+        value=st.session_state.date_range,
+        key="date_input_widget",
+        on_change=on_date_change,
+        label_visibility="collapsed"
+    )
+    # Opdater session state baseret på widget
     if isinstance(date_range, tuple) and len(date_range) == 2:
         start_date, end_date = date_range
+        st.session_state.date_range = date_range
+    elif isinstance(date_range, tuple) and len(date_range) == 1:
+        start_date = date_range[0]
+        end_date = start_date
     else:
-        start_date = date_range[0] if isinstance(date_range, tuple) else date_range
+        start_date = date_range if isinstance(date_range, datetime.date) else today
         end_date = start_date
 
 # Filtrer først efter dato - så dropdowns kun viser data fra valgt periode
