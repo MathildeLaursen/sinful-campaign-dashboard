@@ -394,23 +394,26 @@ div[data-testid="stCheckbox"] label span:first-child {
     box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
 }
 
-/* KALENDER POPOVER - Target den direkte parent til calendar (st-er klassen) */
+/* KALENDER POPOVER STYLING */
 
-/* Den DIREKTE parent div til calendar - den hvide boks */
-[data-baseweb="popover"] > div {
-    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
-    border-radius: 12px !important;
-}
-
-/* Target klasser der typisk bruges på kalender-containeren */
+/* Alle lag i kalender-popoveren */
+div.st-b3.st-dw,
+div.st-dw,
+.st-b3.st-dw,
 div.st-er,
-div.st-d0,
-div[class*="st-er"],
-div[class*="st-d0"] {
+.st-er,
+div.st-dh,
+.st-dh,
+div.st-er.st-au,
+div.st-bx.st-dh {
     background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
+    background-color: transparent !important;
 }
 
-/* Popover med kalender */
+/* Popover og dens children */
+[data-baseweb="popover"],
+[data-baseweb="popover"] > div,
+[data-baseweb="popover"] > div > div,
 [data-baseweb="popover"]:has([data-baseweb="calendar"]) {
     background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
     border: 1px solid #D4BFFF !important;
