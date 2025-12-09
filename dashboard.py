@@ -517,11 +517,25 @@ else:
     current_df = result
     display_pivot_df = pd.DataFrame()
 
+# Beregn foregående periode (samme længde som valgt periode)
+period_days = (pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1
+prev_end_date = pd.to_datetime(start_date) - pd.Timedelta(days=1)
+prev_start_date = prev_end_date - pd.Timedelta(days=period_days - 1)
+
+# Tjek om vi skal vise % ændring (kun hvis ALLE kampagner og emails er valgt)
+show_delta = (len(sel_id_campaigns) == len(all_id_campaigns)) and (len(sel_email_messages) == len(all_email_messages))
+
+# Hent data for foregående periode med samme lande-filter
+prev_df = pd.DataFrame()
+if show_delta:
+    prev_result = filter_data(df, prev_start_date.date(), prev_end_date.date())
+    if isinstance(prev_result, tuple):
+        prev_df = prev_result[0]
 
 # --- VISUALISERING ---
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-def show_metric(col, label, current_val, is_percent=False):
+def show_metric(col, label, current_val, prev_val=None, is_percent=False):
     # Formater hovedværdi
     if is_percent:
         val_fmt = f"{current_val:.1f}%"
@@ -534,7 +548,13 @@ def show_metric(col, label, current_val, is_percent=False):
         else:
             val_fmt = f"{current_val:.0f}"
     
-    col.metric(label, val_fmt)
+    # Beregn delta hvis prev_val er givet
+    if prev_val is not None and prev_val != 0:
+        pct_change = ((current_val - prev_val) / prev_val) * 100
+        delta_str = f"{pct_change:+.1f}%"
+        col.metric(label, val_fmt, delta=delta_str)
+    else:
+        col.metric(label, val_fmt)
 
 cur_sent = current_df['Total_Received'].sum() if not current_df.empty else 0
 cur_opens = current_df['Unique_Opens'].sum() if not current_df.empty else 0
@@ -543,12 +563,20 @@ cur_or = current_df['Open Rate %'].mean() if not current_df.empty else 0
 cur_cr = current_df['Click Rate %'].mean() if not current_df.empty else 0
 cur_ctr = (cur_clicks / cur_opens * 100) if cur_opens > 0 else 0
 
-show_metric(col1, "Emails Sendt", cur_sent)
-show_metric(col2, "Unikke Opens", cur_opens)
-show_metric(col3, "Unikke Clicks", cur_clicks)
-show_metric(col4, "Open Rate", cur_or, is_percent=True)
-show_metric(col5, "Click Rate", cur_cr, is_percent=True)
-show_metric(col6, "Click Through Rate", cur_ctr, is_percent=True)
+# Foregående periode værdier
+prev_sent = prev_df['Total_Received'].sum() if not prev_df.empty and show_delta else None
+prev_opens = prev_df['Unique_Opens'].sum() if not prev_df.empty and show_delta else None
+prev_clicks = prev_df['Unique_Clicks'].sum() if not prev_df.empty and show_delta else None
+prev_or = prev_df['Open Rate %'].mean() if not prev_df.empty and show_delta else None
+prev_cr = prev_df['Click Rate %'].mean() if not prev_df.empty and show_delta else None
+prev_ctr = (prev_clicks / prev_opens * 100) if prev_opens and prev_opens > 0 and show_delta else None
+
+show_metric(col1, "Emails Sendt", cur_sent, prev_sent)
+show_metric(col2, "Unikke Opens", cur_opens, prev_opens)
+show_metric(col3, "Unikke Clicks", cur_clicks, prev_clicks)
+show_metric(col4, "Open Rate", cur_or, prev_or, is_percent=True)
+show_metric(col5, "Click Rate", cur_cr, prev_cr, is_percent=True)
+show_metric(col6, "Click Through Rate", cur_ctr, prev_ctr, is_percent=True)
 
 if not current_df.empty:
     display_df = current_df.copy()
