@@ -188,114 +188,115 @@ except Exception as e:
     st.error(f"Fejl: {e}")
     st.stop()
 
-# --- FILTRE & DATO LOGIK (Smart Controller) ---
+# --- FILTRE & DATO LOGIK (Single Box Solution) ---
 
 today = datetime.date.today()
 
-# 1. Funktion til at beregne datoer baseret på valg
+# 1. Funktion til at beregne datoer
 def calculate_date_range(preset):
-    if preset == "I dag":
-        return today, today
-    elif preset == "I går":
-        return today - datetime.timedelta(days=1), today - datetime.timedelta(days=1)
-    elif preset == "Denne uge":
-        start = today - datetime.timedelta(days=today.weekday())
-        return start, today
-    elif preset == "Sidste 7 dage":
-        return today - datetime.timedelta(days=7), today
-    elif preset == "Sidste 14 dage":
-        return today - datetime.timedelta(days=14), today
-    elif preset == "Sidste 30 dage":
-        return today - datetime.timedelta(days=30), today
-    elif preset == "Denne måned":
-        start = today.replace(day=1)
-        return start, today
+    if preset == "I dag": return today, today
+    elif preset == "I går": return today - datetime.timedelta(days=1), today - datetime.timedelta(days=1)
+    elif preset == "Denne uge": return today - datetime.timedelta(days=today.weekday()), today
+    elif preset == "Sidste 7 dage": return today - datetime.timedelta(days=7), today
+    elif preset == "Sidste 14 dage": return today - datetime.timedelta(days=14), today
+    elif preset == "Sidste 30 dage": return today - datetime.timedelta(days=30), today
+    elif preset == "Denne måned": return today.replace(day=1), today
     elif preset == "Sidste måned":
-        first_day_this_month = today.replace(day=1)
-        last_day_last_month = first_day_this_month - datetime.timedelta(days=1)
-        start = last_day_last_month.replace(day=1)
-        return start, last_day_last_month
-    elif preset == "I år":
-        start = today.replace(month=1, day=1)
-        return start, today
-    elif preset == "Sidste år":
-        start = datetime.date(today.year - 1, 1, 1)
-        end = datetime.date(today.year - 1, 12, 31)
-        return start, end
+        first = today.replace(day=1)
+        last_prev = first - datetime.timedelta(days=1)
+        return last_prev.replace(day=1), last_prev
+    elif preset == "I år": return today.replace(month=1, day=1), today
+    elif preset == "Sidste år": return datetime.date(today.year - 1, 1, 1), datetime.date(today.year - 1, 12, 31)
     return None
 
-# 2. Session State Initialisering
+# 2. Session State
 if 'date_range' not in st.session_state:
     st.session_state.date_range = (today - datetime.timedelta(days=30), today)
-if 'preset_selection' not in st.session_state:
-    st.session_state.preset_selection = "Sidste 30 dage"
+if 'date_label' not in st.session_state:
+    st.session_state.date_label = "Sidste 30 dage"
 
-# 3. Callbacks (Logikken der binder de to felter sammen)
-def on_preset_change():
-    """Køres når dropdown ændres"""
-    selection = st.session_state.preset_selection
-    new_range = calculate_date_range(selection)
-    if new_range:
-        st.session_state.date_range = new_range
+# 3. Layout - ÉN kolonne til dato (ingen preset kolonne)
+col_dato, col_land, col_kamp, col_email = st.columns([1.5, 1, 1, 1])
 
-def on_date_change():
-    """Køres når kalenderen ændres manuelt"""
-    st.session_state.preset_selection = "Tilpasset"
+with col_dato:
+    # Dette er den ENESTE boks brugeren ser
+    with st.popover(st.session_state.date_label, use_container_width=True):
+        st.markdown("**Vælg periode**")
+        
+        # Liste over presets (som radio buttons for Looker-følelse)
+        presets = ["I dag", "I går", "Denne uge", "Sidste 7 dage", "Sidste 30 dage", "Denne måned", "Sidste måned", "I år", "Sidste år"]
+        
+        # Vi bruger columns til at lave pæne knapper
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Sidste 7 dage", use_container_width=True):
+                st.session_state.date_range = calculate_date_range("Sidste 7 dage")
+                st.session_state.date_label = "Sidste 7 dage"
+                st.rerun()
+            if st.button("Sidste 30 dage", use_container_width=True):
+                st.session_state.date_range = calculate_date_range("Sidste 30 dage")
+                st.session_state.date_label = "Sidste 30 dage"
+                st.rerun()
+            if st.button("Denne måned", use_container_width=True):
+                st.session_state.date_range = calculate_date_range("Denne måned")
+                st.session_state.date_label = "Denne måned"
+                st.rerun()
+             
+        with c2:
+            if st.button("I går", use_container_width=True):
+                st.session_state.date_range = calculate_date_range("I går")
+                st.session_state.date_label = "I går"
+                st.rerun()
+            if st.button("Sidste måned", use_container_width=True):
+                st.session_state.date_range = calculate_date_range("Sidste måned")
+                st.session_state.date_label = "Sidste måned"
+                st.rerun()
+            if st.button("I år", use_container_width=True):
+                st.session_state.date_range = calculate_date_range("I år")
+                st.session_state.date_label = "I år"
+                st.rerun()
 
-# --- LAYOUT AF FILTRE ---
-# Vi laver 5 kolonner for at få dato-vælgerne til at stå pænt sammen
-col_preset, col_picker, col_land, col_kamp, col_email = st.columns([1.2, 1.5, 1.2, 1.2, 1.2])
+        st.divider()
+        
+        # Manuel kalender valg
+        st.markdown("**Eller vælg datoer:**")
+        
+        new_range = st.date_input(
+            "Custom range",
+            value=st.session_state.date_range,
+            label_visibility="collapsed"
+        )
+        
+        # Hvis datoen ændres manuelt, opdater label til at vise datoerne
+        if new_range != st.session_state.date_range:
+            st.session_state.date_range = new_range
+            if len(new_range) == 2:
+                s, e = new_range
+                st.session_state.date_label = f"{s.strftime('%d/%m')} - {e.strftime('%d/%m')}"
+                st.rerun()
 
-with col_preset:
-    options = [
-        "Tilpasset", 
-        "I dag", "I går", 
-        "Denne uge", "Sidste 7 dage", "Sidste 14 dage", "Sidste 30 dage", 
-        "Denne måned", "Sidste måned", 
-        "I år", "Sidste år"
-    ]
-    st.selectbox(
-        "Periode preset",
-        options=options,
-        key="preset_selection",
-        on_change=on_preset_change,
-        label_visibility="collapsed" # Skjuler label for et rent look
-    )
-
-with col_picker:
-    st.date_input(
-        "Vælg datoer",
-        value=st.session_state.date_range,
-        key="date_range",
-        on_change=on_date_change,
-        label_visibility="collapsed"
-    )
-
-# Hent de aktuelle datoer til brug i filtrering
+# Hent datoer til filtrering
 if len(st.session_state.date_range) == 2:
     start_date, end_date = st.session_state.date_range
 else:
     start_date, end_date = st.session_state.date_range[0], st.session_state.date_range[0]
 
-# Filtrer dataframen
+# Filtrer data
 date_mask = (df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))
 df_date_filtered = df[date_mask]
 
-# --- TRACKING AF PERIODE ÆNDRING (Reset logik) ---
+# --- RESET LOGIK (Samme som før) ---
 current_period_key = f"{start_date}_{end_date}"
 if 'last_period_key' not in st.session_state:
     st.session_state.last_period_key = current_period_key
 
-period_changed = st.session_state.last_period_key != current_period_key
-
-# Reset filtre hvis perioden ændres
-if period_changed:
+if st.session_state.last_period_key != current_period_key:
     st.session_state.last_period_key = current_period_key
     st.session_state.selected_campaigns = None
     st.session_state.selected_emails = None
     st.session_state.selected_countries = None
 
-# Initialize session states for filtre hvis de mangler
+# Init session states
 if 'selected_campaigns' not in st.session_state: st.session_state.selected_campaigns = None
 if 'selected_emails' not in st.session_state: st.session_state.selected_emails = None
 if 'selected_countries' not in st.session_state: st.session_state.selected_countries = None
@@ -303,29 +304,20 @@ if 'cb_reset_land' not in st.session_state: st.session_state.cb_reset_land = 0
 if 'cb_reset_kamp' not in st.session_state: st.session_state.cb_reset_kamp = 0
 if 'cb_reset_email' not in st.session_state: st.session_state.cb_reset_email = 0
 
-# Opdater filter options baseret på den nye df_date_filtered
+# Opdater filter lister
 all_countries = sorted(df_date_filtered['Country'].unique())
 all_id_campaigns = sorted(df_date_filtered['ID_Campaign'].astype(str).unique())
 all_email_messages = sorted(df_date_filtered['Email_Message'].astype(str).unique())
 
 # Pre-select logik
-if st.session_state.selected_countries is None:
-    st.session_state.selected_countries = list(all_countries)
-else:
-    st.session_state.selected_countries = [c for c in st.session_state.selected_countries if c in all_countries]
+if st.session_state.selected_countries is None: st.session_state.selected_countries = list(all_countries)
+else: st.session_state.selected_countries = [c for c in st.session_state.selected_countries if c in all_countries]
 
-if st.session_state.selected_campaigns is None:
-    st.session_state.selected_campaigns = list(all_id_campaigns)
-else:
-    st.session_state.selected_campaigns = [c for c in st.session_state.selected_campaigns if c in all_id_campaigns]
+if st.session_state.selected_campaigns is None: st.session_state.selected_campaigns = list(all_id_campaigns)
+else: st.session_state.selected_campaigns = [c for c in st.session_state.selected_campaigns if c in all_id_campaigns]
 
-if st.session_state.selected_emails is None:
-    st.session_state.selected_emails = list(all_email_messages)
-else:
-    st.session_state.selected_emails = [e for e in st.session_state.selected_emails if e in all_email_messages]
-
-# --- HER KOMMER DINE FILTRE (Land, Kampagne, Email) ---
-# (Dette er den samme kode som du havde før, bare indsat i de nye kolonner)
+if st.session_state.selected_emails is None: st.session_state.selected_emails = list(all_email_messages)
+else: st.session_state.selected_emails = [e for e in st.session_state.selected_emails if e in all_email_messages]
 
 # Land filter
 with col_land:
@@ -550,6 +542,7 @@ else:
 if st.button('Opdater Data'):
     st.cache_data.clear()
     st.rerun()
+
 
 
 
