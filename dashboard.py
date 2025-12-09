@@ -550,10 +550,10 @@ show_metric(col4, "Open Rate", cur_or, is_percent=True)
 show_metric(col5, "Click Rate", cur_cr, is_percent=True)
 show_metric(col6, "Click Through Rate", cur_ctr, is_percent=True)
 
-if not display_pivot_df.empty:
-    display_df = display_pivot_df.copy()
+if not current_df.empty:
+    display_df = current_df.copy()
     display_df['Date'] = pd.to_datetime(display_df['Date']).dt.date
-    cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total']
+    cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %', 'Click Through Rate %']
     sorted_df = display_df[cols_to_show].sort_values(by='Date', ascending=False)
     
     # Beregn højde baseret på antal rækker (35px per række + 38px header)
@@ -568,7 +568,12 @@ if not display_pivot_df.empty:
             "Date": st.column_config.DateColumn("Date"),
             "ID_Campaign": st.column_config.TextColumn("Kampagne"),
             "Email_Message": st.column_config.TextColumn("Email"),
-            "Total": st.column_config.NumberColumn("Emails Sendt", format="localized"),
+            "Total_Received": st.column_config.NumberColumn("Emails Sendt", format="localized"),
+            "Unique_Opens": st.column_config.NumberColumn("Unikke Opens", format="localized"),
+            "Unique_Clicks": st.column_config.NumberColumn("Unikke Clicks", format="localized"),
+            "Open Rate %": st.column_config.NumberColumn("Open Rate", format="%.1f%%"),
+            "Click Rate %": st.column_config.NumberColumn("Click Rate", format="%.1f%%"),
+            "Click Through Rate %": st.column_config.NumberColumn("Click Through Rate", format="%.1f%%"),
         }
     )
 else:
