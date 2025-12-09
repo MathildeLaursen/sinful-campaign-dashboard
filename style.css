@@ -38,42 +38,39 @@ h1 {
 }
 
 /* ===========================================
-   SIDEBAR
+   SIDEBAR - SKJULT
    =========================================== */
 
-/* Gør sidebaren smallere med gradient */
+/* Skjul sidebaren helt */
 section[data-testid="stSidebar"] {
-    width: 120px !important;
-    min-width: 120px !important;
-    background: linear-gradient(180deg, #F5E6FF 0%, #FFE6F5 100%) !important;
+    display: none !important;
 }
 
-/* KOMPAKT OG CENTRERET KNAP */
-[data-testid="stSidebar"] .stButton {
-    margin-bottom: 0px !important;
-    padding-bottom: 0px !important;
+/* Skjul sidebar collapse/expand knapper */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stExpandSidebarButton"],
+button[data-testid="stExpandSidebarButton"] {
+    display: none !important;
 }
 
-[data-testid="stSidebar"] button {
-    min-height: 0px !important;
-    height: auto !important;
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    text-align: center !important;
-    width: 100% !important;
-    line-height: 1.2 !important;
-    white-space: nowrap !important;
-    font-size: 14px !important;
+/* ===========================================
+   LOG UD KNAP - Øverste venstre hjørne
+   =========================================== */
+
+/* Style Log Ud knappen */
+[data-testid="stButton"][data-testid*="logout"] button,
+.stButton button:has(p:contains("Log Ud")) {
     background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
     color: white !important;
     border: none !important;
     border-radius: 8px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    min-height: 0 !important;
+    height: auto !important;
 }
 
-[data-testid="stSidebar"] button:hover {
+[data-testid="stButton"][data-testid*="logout"] button:hover {
     background: linear-gradient(135deg, #8A6DAC 0%, #D7A3BA 100%) !important;
 }
 
