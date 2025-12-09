@@ -13,19 +13,36 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS: DESIGN TILPASNINGER ---
+# --- CSS: CLASSY UNICORN TEMA ---
 st.markdown("""
     <style>
+        /* UNICORN FARVEPALETTE */
+        :root {
+            --unicorn-pink: #E8B4CB;
+            --unicorn-purple: #9B7EBD;
+            --unicorn-lavender: #D4BFFF;
+            --unicorn-mint: #A8E6CF;
+            --unicorn-peach: #FFD3B6;
+            --unicorn-dark: #4A3F55;
+            --unicorn-light: #FAF5FF;
+        }
+        
+        /* Hovedbaggrund med subtil gradient */
+        .stApp {
+            background: linear-gradient(135deg, #FAF5FF 0%, #F0E6FF 25%, #FFE6F0 50%, #E6F5FF 75%, #F0FFF4 100%) !important;
+        }
+        
         /* 1. Fjern luft i toppen af hovedvinduet */
         .block-container {
             padding-top: 1rem;
             padding-bottom: 5rem;
         }
         
-        /* 2. Gør sidebaren smallere (og håndter min-width) */
+        /* 2. Gør sidebaren smallere med gradient */
         section[data-testid="stSidebar"] {
             width: 120px !important;
             min-width: 120px !important;
+            background: linear-gradient(180deg, #F5E6FF 0%, #FFE6F5 100%) !important;
         }
 
         /* 3. KOMPAKT OG CENTRERET KNAP */
@@ -35,26 +52,29 @@ st.markdown("""
         }
 
         [data-testid="stSidebar"] button {
-            /* Størrelse og luft */
             min-height: 0px !important;
             height: auto !important;
-            padding-top: 6px !important;    /* Lidt mere luft foroven/forneden ser pænere ud */
+            padding-top: 6px !important;
             padding-bottom: 6px !important;
-            
-            /* CENTRERING AF TEKST (Magien sker her) */
             display: flex !important;
-            justify-content: center !important; /* Centrer vandret */
-            align-items: center !important;     /* Centrer lodret */
+            justify-content: center !important;
+            align-items: center !important;
             text-align: center !important;
-            width: 100% !important;             /* Fyld hele bredden ud, så ser det pænest ud */
-            
-            /* Tekst styling */
+            width: 100% !important;
             line-height: 1.2 !important;
             white-space: nowrap !important;
             font-size: 14px !important;
+            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+        }
+        
+        [data-testid="stSidebar"] button:hover {
+            background: linear-gradient(135deg, #8A6DAC 0%, #D7A3BA 100%) !important;
         }
 
-        /* 4. Fjern rød ramme fra ALLE input felter */
+        /* 4. Input felter med unicorn styling */
         input:focus, input:active,
         [data-baseweb="input"] input:focus,
         [data-baseweb="select"] > div:focus,
@@ -62,8 +82,8 @@ st.markdown("""
         .stSelectbox > div > div:focus,
         .stMultiSelect > div > div:focus,
         .stDateInput input:focus {
-            border-color: #ccc !important;
-            box-shadow: none !important;
+            border-color: #9B7EBD !important;
+            box-shadow: 0 0 0 2px rgba(155, 126, 189, 0.2) !important;
             outline: none !important;
         }
         
@@ -73,41 +93,113 @@ st.markdown("""
         .stSelectbox > div > div,
         .stMultiSelect > div > div,
         .stDateInput > div > div {
-            border-color: #ccc !important;
+            border-color: #D4BFFF !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+            border-radius: 8px !important;
         }
         
-        /* Specifik for multiselect dropdown */
+        /* Multiselect dropdown */
         .stMultiSelect [data-baseweb="select"] > div,
         .stMultiSelect [data-baseweb="select"] > div:focus,
         .stMultiSelect [data-baseweb="select"] > div:focus-within,
         .stMultiSelect [data-baseweb="select"] > div:active,
         [data-baseweb="popover"] {
-            border-color: #ccc !important;
+            border-color: #D4BFFF !important;
             box-shadow: none !important;
             outline: none !important;
         }
         
-        /* Target selectbox og multiselect wrapper */
         div[data-baseweb="select"] > div {
-            border-color: #ccc !important;
+            border-color: #D4BFFF !important;
         }
         
         div[data-baseweb="select"] > div:focus-within {
-            border-color: #0068c9 !important;
-            box-shadow: none !important;
+            border-color: #9B7EBD !important;
+            box-shadow: 0 0 0 2px rgba(155, 126, 189, 0.2) !important;
         }
         
-        /* Popover knap styling: venstrestil tekst, højrestil pil */
+        /* Popover knap styling */
         button[data-testid="stPopoverButton"] {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
             width: 100% !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: 1px solid #D4BFFF !important;
+            border-radius: 8px !important;
+        }
+        
+        button[data-testid="stPopoverButton"]:hover {
+            border-color: #9B7EBD !important;
+            background: rgba(212, 191, 255, 0.1) !important;
         }
         
         button[data-testid="stPopoverButton"] p {
             text-align: left !important;
             margin: 0 !important;
+            color: #4A3F55 !important;
+        }
+        
+        /* Venstrestil data i tabel */
+        [data-testid="stDataFrame"] td {
+            text-align: left !important;
+        }
+        
+        [data-testid="stDataFrame"] th {
+            text-align: left !important;
+            background: linear-gradient(135deg, #F5E6FF 0%, #FFE6F5 100%) !important;
+        }
+        
+        /* Metric cards styling */
+        [data-testid="stMetric"] {
+            background: rgba(255, 255, 255, 0.7) !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            border: 1px solid rgba(155, 126, 189, 0.2) !important;
+            box-shadow: 0 2px 8px rgba(155, 126, 189, 0.1) !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #9B7EBD !important;
+        }
+        
+        [data-testid="stMetricValue"] {
+            color: #4A3F55 !important;
+        }
+        
+        /* Hovedtitel */
+        h1 {
+            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 50%, #A8E6CF 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+        
+        /* Knapper generelt */
+        .stButton > button {
+            background: linear-gradient(135deg, #9B7EBD 0%, #E8B4CB 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #8A6DAC 0%, #D7A3BA 100%) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(155, 126, 189, 0.3) !important;
+        }
+        
+        /* Checkboxes */
+        .stCheckbox label span[data-checked="true"] {
+            background-color: #9B7EBD !important;
+            border-color: #9B7EBD !important;
+        }
+        
+        /* Dato input */
+        .stDateInput input {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border-radius: 8px !important;
         }
 
     </style>
@@ -291,20 +383,14 @@ if 'last_period_key' not in st.session_state:
     st.session_state.last_period_key = current_period_key
 
 period_changed = st.session_state.last_period_key != current_period_key
-if period_changed:
-    st.session_state.last_period_key = current_period_key
-    # Nulstil alle filtre når perioden ændres
-    st.session_state.selected_campaigns = []
-    st.session_state.selected_emails = []
-    st.session_state.selected_countries = []
 
 # Initialize session states
 if 'selected_campaigns' not in st.session_state:
-    st.session_state.selected_campaigns = []
+    st.session_state.selected_campaigns = None  # None = ikke initialiseret
 if 'selected_emails' not in st.session_state:
-    st.session_state.selected_emails = []
+    st.session_state.selected_emails = None
 if 'selected_countries' not in st.session_state:
-    st.session_state.selected_countries = []
+    st.session_state.selected_countries = None
 if 'search_campaign' not in st.session_state:
     st.session_state.search_campaign = ""
 if 'search_email' not in st.session_state:
@@ -312,52 +398,50 @@ if 'search_email' not in st.session_state:
 if 'search_country' not in st.session_state:
     st.session_state.search_country = ""
 
+if period_changed:
+    st.session_state.last_period_key = current_period_key
+    # Nulstil alle filtre når perioden ændres (None = vælg alle)
+    st.session_state.selected_campaigns = None
+    st.session_state.selected_emails = None
+    st.session_state.selected_countries = None
+
 # Land filter først (for at påvirke tilgængelige kampagner)
 all_countries = sorted(df_date_filtered['Country'].unique())
 
-# Pre-select alle lande hvis tom (efter periode-ændring eller første gang)
-if not st.session_state.selected_countries:
+# Pre-select alle lande kun ved første load eller periode-ændring
+if st.session_state.selected_countries is None:
     st.session_state.selected_countries = list(all_countries)
+else:
+    # Synkroniser: fjern lande der ikke findes i perioden
+    st.session_state.selected_countries = [c for c in st.session_state.selected_countries if c in all_countries]
 
-# Synkroniser: fjern lande der ikke findes i perioden
-st.session_state.selected_countries = [c for c in st.session_state.selected_countries if c in all_countries]
-
-# Hvis alle lande blev fjernet, vælg alle igen
-if not st.session_state.selected_countries:
-    st.session_state.selected_countries = list(all_countries)
-
-# Filtrer på land hvis ikke alle er valgt
-if len(st.session_state.selected_countries) < len(all_countries):
+# Filtrer på land (tom liste = ingen data)
+if st.session_state.selected_countries:
     df_land_filtered = df_date_filtered[df_date_filtered['Country'].isin(st.session_state.selected_countries)]
 else:
-    df_land_filtered = df_date_filtered
+    df_land_filtered = df_date_filtered.head(0)  # Tom DataFrame
 
 # Kampagne filter (baseret på dato + land)
 all_id_campaigns = sorted(df_land_filtered['ID_Campaign'].astype(str).unique())
 
-# Pre-select alle kampagner hvis tom
-if not st.session_state.selected_campaigns:
+# Pre-select alle kampagner kun ved første load eller periode-ændring
+if st.session_state.selected_campaigns is None:
     st.session_state.selected_campaigns = list(all_id_campaigns)
-
-# Synkroniser: fjern kampagner der ikke findes i filtreret data
-st.session_state.selected_campaigns = [c for c in st.session_state.selected_campaigns if c in all_id_campaigns]
-
-# Hvis alle kampagner blev fjernet, vælg alle igen
-if not st.session_state.selected_campaigns:
-    st.session_state.selected_campaigns = list(all_id_campaigns)
+else:
+    # Synkroniser: fjern kampagner der ikke findes i filtreret data
+    st.session_state.selected_campaigns = [c for c in st.session_state.selected_campaigns if c in all_id_campaigns]
 
 # Land filter
 with col_land:
-    with st.popover("Land ▾", use_container_width=True):
-        all_selected = len(st.session_state.selected_countries) == len(all_countries)
-        if st.checkbox("Vælg alle", value=all_selected, key="select_all_countries_cb"):
-            if not all_selected:
-                st.session_state.selected_countries = list(all_countries)
-                st.rerun()
-        else:
-            if all_selected:
-                st.session_state.selected_countries = []
-                st.rerun()
+    with st.popover("Land", use_container_width=True):
+        all_selected = len(st.session_state.selected_countries) == len(all_countries) and len(all_countries) > 0
+        select_all_countries = st.checkbox("Vælg alle", value=all_selected, key="select_all_countries_cb")
+        if select_all_countries and not all_selected:
+            st.session_state.selected_countries = list(all_countries)
+            st.rerun()
+        elif not select_all_countries and all_selected:
+            st.session_state.selected_countries = []
+            st.rerun()
         
         search_term = st.text_input("🔍 Søg", key="search_country", label_visibility="collapsed", placeholder="Søg...")
         filtered_countries = [c for c in all_countries if search_term.lower() in c.lower()] if search_term else all_countries
@@ -373,16 +457,15 @@ with col_land:
 
 # Kampagne filter
 with col_kamp:
-    with st.popover("Kampagne ▾", use_container_width=True):
-        all_selected = len(st.session_state.selected_campaigns) == len(all_id_campaigns)
-        if st.checkbox("Vælg alle", value=all_selected, key="select_all_campaigns_cb"):
-            if not all_selected:
-                st.session_state.selected_campaigns = list(all_id_campaigns)
-                st.rerun()
-        else:
-            if all_selected:
-                st.session_state.selected_campaigns = []
-                st.rerun()
+    with st.popover("Kampagne", use_container_width=True):
+        all_selected = len(st.session_state.selected_campaigns) == len(all_id_campaigns) and len(all_id_campaigns) > 0
+        select_all_campaigns = st.checkbox("Vælg alle", value=all_selected, key="select_all_campaigns_cb")
+        if select_all_campaigns and not all_selected:
+            st.session_state.selected_campaigns = list(all_id_campaigns)
+            st.rerun()
+        elif not select_all_campaigns and all_selected:
+            st.session_state.selected_campaigns = []
+            st.rerun()
         
         search_term = st.text_input("🔍 Søg", key="search_campaign", label_visibility="collapsed", placeholder="Søg...")
         filtered_campaigns = [c for c in all_id_campaigns if search_term.lower() in c.lower()] if search_term else all_id_campaigns
@@ -406,26 +489,24 @@ else:
 
 all_email_messages = sorted(filtered_for_email['Email_Message'].astype(str).unique())
 
-if not st.session_state.selected_emails:
+# Pre-select alle emails kun ved første load eller periode-ændring
+if st.session_state.selected_emails is None:
     st.session_state.selected_emails = list(all_email_messages)
-
-st.session_state.selected_emails = [e for e in st.session_state.selected_emails if e in all_email_messages]
-
-if not st.session_state.selected_emails:
-    st.session_state.selected_emails = list(all_email_messages)
+else:
+    # Synkroniser: fjern emails der ikke findes i filtreret data
+    st.session_state.selected_emails = [e for e in st.session_state.selected_emails if e in all_email_messages]
 
 # Email filter
 with col_email:
-    with st.popover("Email ▾", use_container_width=True):
-        all_selected = len(st.session_state.selected_emails) == len(all_email_messages)
-        if st.checkbox("Vælg alle", value=all_selected, key="select_all_emails_cb"):
-            if not all_selected:
-                st.session_state.selected_emails = list(all_email_messages)
-                st.rerun()
-        else:
-            if all_selected:
-                st.session_state.selected_emails = []
-                st.rerun()
+    with st.popover("Email", use_container_width=True):
+        all_selected = len(st.session_state.selected_emails) == len(all_email_messages) and len(all_email_messages) > 0
+        select_all_emails = st.checkbox("Vælg alle", value=all_selected, key="select_all_emails_cb")
+        if select_all_emails and not all_selected:
+            st.session_state.selected_emails = list(all_email_messages)
+            st.rerun()
+        elif not select_all_emails and all_selected:
+            st.session_state.selected_emails = []
+            st.rerun()
         
         search_term = st.text_input("🔍 Søg", key="search_email", label_visibility="collapsed", placeholder="Søg...")
         filtered_emails = [e for e in all_email_messages if search_term.lower() in e.lower()] if search_term else all_email_messages
@@ -544,19 +625,25 @@ if not display_pivot_df.empty:
     display_df = display_pivot_df.copy()
     display_df['Date'] = pd.to_datetime(display_df['Date']).dt.date
     cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total', 'DK', 'SE', 'NO', 'FI']
+    sorted_df = display_df[cols_to_show].sort_values(by='Date', ascending=False)
+    
+    # Beregn højde baseret på antal rækker (35px per række + 38px header)
+    table_height = (len(sorted_df) + 1) * 35 + 3
+    
     st.dataframe(
-        display_df[cols_to_show].sort_values(by='Date', ascending=False),
+        sorted_df,
         use_container_width=True,
         hide_index=True,
+        height=table_height,
         column_config={
-            "Date": st.column_config.DateColumn("Date", width="small"),
-            "ID_Campaign": st.column_config.TextColumn("Kampagne", width="medium"),
-            "Email_Message": st.column_config.TextColumn("Email", width="large"),
-            "Total": st.column_config.NumberColumn("Total", format="%d", width="small"),
-            "DK": st.column_config.NumberColumn("DK", format="%d", width="small"),
-            "SE": st.column_config.NumberColumn("SE", format="%d", width="small"),
-            "NO": st.column_config.NumberColumn("NO", format="%d", width="small"),
-            "FI": st.column_config.NumberColumn("FI", format="%d", width="small"),
+            "Date": st.column_config.DateColumn("Date"),
+            "ID_Campaign": st.column_config.TextColumn("Kampagne"),
+            "Email_Message": st.column_config.TextColumn("Email"),
+            "Total": st.column_config.NumberColumn("Total", format="%,d"),
+            "DK": st.column_config.NumberColumn("DK", format="%,d"),
+            "SE": st.column_config.NumberColumn("SE", format="%,d"),
+            "NO": st.column_config.NumberColumn("NO", format="%,d"),
+            "FI": st.column_config.NumberColumn("FI", format="%,d"),
         }
     )
 else:
