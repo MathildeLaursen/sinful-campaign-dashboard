@@ -640,7 +640,7 @@ if not current_df.empty:
     chart_df = chart_df.sort_values('Date')
     
     # Opret graf med to y-akser
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig = make_subplots(specs=[[{"secondary_y": True}]], subplot_titles=[""])
     
     # Open Rate (venstre y-akse)
     fig.add_trace(
@@ -700,7 +700,10 @@ if not current_df.empty:
     )
     fig.update_xaxes(gridcolor='rgba(212,191,255,0.2)')
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    
+    # Lidt luft mellem graf og tabel
+    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
     
     # --- TABEL ---
     cols_to_show = ['Date', 'ID_Campaign', 'Email_Message', 'Total_Received', 'Unique_Opens', 'Unique_Clicks', 'Open Rate %', 'Click Rate %', 'Click Through Rate %']
