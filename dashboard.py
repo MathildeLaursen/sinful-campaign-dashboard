@@ -103,10 +103,15 @@ st.markdown("""
             gap: 0.5rem !important;
         }
         
-        /* JUSTÉR DENNE VÆRDI for afstand mellem kolonner (boks → tekst) */
-        /* Mindre værdi = tættere sammen, større værdi = mere luft */
-        [data-testid="stExpander"] .stHorizontalBlock {
-            gap: 1.5rem !important;  /* Prøv: 0.25rem, 0.5rem, 1rem, 1.5rem, 2rem */
+        /* Afstand mellem hovedkolonner (Periode-gruppe → Start-gruppe) */
+        [data-testid="stExpander"] > div > div > .stVerticalBlock > div > .stHorizontalBlock {
+            gap: 1.5rem !important;
+        }
+        
+        /* JUSTÉR DENNE: Afstand mellem label-tekst og dropdown INDEN i hver gruppe */
+        /* Sæt til 0 for minimal afstand */
+        [data-testid="stExpander"] .stHorizontalBlock .stHorizontalBlock {
+            gap: 0.3rem !important;  /* Prøv: 0rem, 0.2rem, 0.3rem, 0.5rem */
         }
         
         [data-testid="stExpander"] .stSelectbox,
@@ -294,9 +299,8 @@ with st.expander("Filtrér", expanded=True):
         else:
             return today - datetime.timedelta(days=30), today
     
-    # JUSTÉR SPACING: Ændr første tal i [0.18, 0.82] for at ændre afstand mellem tekst og boks
-    # Mindre tal = mindre plads til tekst, større tal = mere plads til tekst
-    label_ratio = [0.16, 0.84]
+    # Label bredde - hold denne lav, spacing styres nu via CSS
+    label_ratio = [0.12, 0.88]
     
     # Række 1: Periode, Start, Slut
     col_periode, col_start_group, col_end_group = st.columns(3)
@@ -375,6 +379,9 @@ with st.expander("Filtrér", expanded=True):
             st.markdown("<p style='margin-top: 8px; font-size: 14px; font-weight: bold;'>A/B</p>", unsafe_allow_html=True)
         with ab2:
             sel_variants = st.multiselect("A/B", all_variants, default=[], placeholder="Vælg...", label_visibility="collapsed")
+    
+    # Sammenlignings-tekst inde i filter-boksen
+    st.caption(f"Sammenlignet med: {prev_start_date} - {prev_end_date}")
 
 
 # --- DATA FILTRERING ---
@@ -396,8 +403,6 @@ prev_df = filter_data(df, prev_start_date, prev_end_date)
 
 
 # --- VISUALISERING ---
-st.caption(f"Sammenlignet med: {prev_start_date} - {prev_end_date}")
-
 col1, col2, col3, col4 = st.columns(4)
 
 def show_metric(col, label, current_val, prev_val, format_str, is_percent=False):
@@ -472,6 +477,5 @@ else:
 if st.button('🔄 Opdater Data'):
     st.cache_data.clear()
     st.rerun()
-
 
 
