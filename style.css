@@ -394,24 +394,28 @@ div[data-testid="stCheckbox"] label span:first-child {
     box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
 }
 
-/* Kalender popover - target den specifikke container med st-f8 klasse */
+/* KALENDER POPOVER - Target den direkte parent til calendar (st-er klassen) */
+
+/* Den DIREKTE parent div til calendar - den hvide boks */
+[data-baseweb="popover"] > div {
+    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
+    border-radius: 12px !important;
+}
+
+/* Target klasser der typisk bruges på kalender-containeren */
+div.st-er,
+div.st-d0,
+div[class*="st-er"],
+div[class*="st-d0"] {
+    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
+}
+
+/* Popover med kalender */
 [data-baseweb="popover"]:has([data-baseweb="calendar"]) {
     background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
     border: 1px solid #D4BFFF !important;
     border-radius: 12px !important;
     box-shadow: 0 8px 32px rgba(155, 126, 189, 0.2) !important;
-}
-
-/* Den indre container (st-f8 klasse) omkring kalenderen */
-[data-baseweb="popover"]:has([data-baseweb="calendar"]) > div {
-    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
-    background-color: transparent !important;
-}
-
-/* Specifik targeting af st-f8 klasse i kalender context */
-.st-f8:has([data-baseweb="calendar"]),
-div.st-f8 [data-baseweb="calendar"] {
-    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
 }
 
 /* Datepicker container */
@@ -423,11 +427,14 @@ div.st-f8 [data-baseweb="calendar"] {
     padding: 8px !important;
 }
 
-/* Fjern hvid baggrund fra ALLE elementer i kalender-popoveren */
-[data-baseweb="popover"]:has([data-baseweb="calendar"]) *,
-[data-baseweb="calendar"] *,
-[data-baseweb="datepicker"] * {
+/* Fjern hvid baggrund fra elementer inde i kalenderen */
+[data-baseweb="calendar"] * {
     background-color: transparent !important;
+}
+
+/* Behold gradient på selve kalenderen */
+[data-baseweb="calendar"] {
+    background: linear-gradient(180deg, #FAF5FF 0%, #FFF5FA 100%) !important;
 }
 
 /* Skjul "Choose a date range" dropdown og tekst i kalenderen */
