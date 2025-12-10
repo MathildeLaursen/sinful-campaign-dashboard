@@ -109,13 +109,17 @@ def check_password():
 # Titel
 st.title("Newsletter Dashboard")
 
-# --- DATA INDLÆSNING ---
+# --- DATA INDLÆSNING (v2 - force refresh) ---
 def load_google_sheet_data():
-    """Henter data fra Google Sheet UDEN cache"""
+    """Henter data fra Google Sheet - INGEN cache"""
     conn = st.connection("gsheets", type=GSheetsConnection)
     try:
-        # Tving refresh: ttl=0, worksheet=0 (første sheet)
-        raw_df = conn.read(worksheet=0, ttl=0)
+        # Force complete refresh med usecols for at undgå cache
+        raw_df = conn.read(
+            worksheet=0, 
+            ttl=0,
+            usecols=list(range(80))  # Læs de første 80 kolonner eksplicit
+        )
         # Skip de første 2 rækker (headers)
         raw_df = raw_df.iloc[2:].reset_index(drop=True)
     except Exception as e:
