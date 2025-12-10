@@ -214,6 +214,15 @@ try:
     if df.empty:
         st.error("Kunne ikke hente data. Tjek Secrets.")
         st.stop()
+    
+    # DEBUG: Vis nyeste datoer i data
+    with st.expander("🔍 Debug: Data info"):
+        st.write(f"**Antal rækker i data:** {len(df)}")
+        st.write(f"**Nyeste dato i data:** {df['Date'].max()}")
+        st.write(f"**Ældste dato i data:** {df['Date'].min()}")
+        st.write("**Seneste 5 unikke datoer:**")
+        st.write(df['Date'].drop_duplicates().nlargest(5).tolist())
+        
 except Exception as e:
     st.error(f"Fejl: {e}")
     st.stop()
