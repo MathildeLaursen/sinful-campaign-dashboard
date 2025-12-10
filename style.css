@@ -214,229 +214,77 @@ button[data-testid="stPopoverButton"] p {
 }
 
 /* ===========================================
-   CHECKBOXES
+   CHECKBOXES - SIMPEL OG REN
    =========================================== */
 
-/* Checkboxes i unicorn stil */
-.stCheckbox label {
-    padding: 0.2rem 0.3rem !important;
-    border-radius: 6px !important;
-    background: transparent !important;
+/* Label styling */
+.stCheckbox label,
+label[data-baseweb="checkbox"] {
     display: flex !important;
     align-items: center !important;
-    gap: 0.5rem !important;
+    gap: 8px !important;
+    padding: 0.2rem 0.3rem !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
 }
 
 .stCheckbox label:hover {
     background: rgba(232, 180, 203, 0.1) !important;
 }
 
-/* Tekst ved siden af checkbox - vertikal centrering */
-.stCheckbox label > div:last-child,
-label[data-baseweb="checkbox"] > div.st-dy {
-    display: flex !important;
-    align-items: center !important;
-    padding-top: 0 !important;
-}
-
-/* Checkbox label PRÆCIS alignment */
-label[data-baseweb="checkbox"] {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-}
-
-/* Checkbox boks størrelse og alignment */
-label[data-baseweb="checkbox"] > span:first-child {
-    flex-shrink: 0 !important;
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    min-height: 18px !important;
-}
-
-/* FJERN TEKST HIGHLIGHT */
-.stCheckbox label span,
-.stCheckbox label p,
-.stCheckbox span,
+/* Fjern tekst highlight baggrund */
 .stCheckbox p,
-.stCheckbox [data-testid="stMarkdownContainer"],
-.stCheckbox [data-testid="stMarkdownContainer"] p,
-.stCheckbox [data-testid="stMarkdownContainer"] span,
-[data-testid="stPopover"] .stCheckbox span,
-[data-testid="stPopover"] .stCheckbox p,
-[data-testid="stPopover"] span,
+.stCheckbox span:not(:first-child),
 [data-testid="stPopover"] p {
     background: transparent !important;
-    background-color: transparent !important;
-    -webkit-box-decoration-break: clone !important;
-    box-decoration-break: clone !important;
 }
 
-/* CHECKBOX BOKS - target span elementet direkte */
-.stCheckbox label[data-baseweb="checkbox"] > span:first-child,
-label[data-baseweb="checkbox"] > span:first-child {
-    border-color: #D4BFFF !important;
-    background-color: white !important;
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* CHECKED STATE - lilla baggrund */
-.stCheckbox label[data-baseweb="checkbox"] > span.st-cs,
-label[data-baseweb="checkbox"] > span.st-cs {
-    background-color: #9B7EBD !important;
-    border-color: #9B7EBD !important;
-}
-
-/* UNCHECKED STATE - hvid med lilla border */
-.stCheckbox label[data-baseweb="checkbox"] > span.st-io,
-label[data-baseweb="checkbox"] > span.st-io {
-    background-color: white !important;
-    border-color: #D4BFFF !important;
-}
-
-/* FLUEBEN/CHECKMARK - brug ::after pseudo-element */
-.stCheckbox label[data-baseweb="checkbox"] > span.st-cs::after,
-label[data-baseweb="checkbox"] > span.st-cs::after,
-.stCheckbox label[data-baseweb="checkbox"] > span:first-child::after,
-label[data-baseweb="checkbox"] > span:first-child::after {
-    content: "✓" !important;
-    color: white !important;
-    font-size: 14px !important;
-    font-weight: bold !important;
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-}
-
-/* Skjul flueben når IKKE checked */
-.stCheckbox label[data-baseweb="checkbox"] > span:first-child:not([data-checked="true"])::after,
-label[data-baseweb="checkbox"] > span:first-child:not([data-checked="true"])::after {
-    content: "" !important;
-}
-
-/* Vis flueben når checked - via aria-checked attribut */
-.stCheckbox input[type="checkbox"]:checked + span::after,
-label[data-baseweb="checkbox"][aria-checked="true"] > span:first-child::after {
-    content: "✓" !important;
-    color: white !important;
-}
-
-/* Checkboxes */
-.stCheckbox label span[data-checked="true"] {
-    background-color: #9B7EBD !important;
-    border-color: #9B7EBD !important;
-}
-
-/* SVG CHECKMARK IKON - gør det synligt */
-.stCheckbox label[data-baseweb="checkbox"] svg,
-label[data-baseweb="checkbox"] svg,
-[data-baseweb="checkbox"] svg {
-    fill: white !important;
-    color: white !important;
-    stroke: white !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    display: block !important;
-}
-
-/* Checkbox span med checked state */
-.stCheckbox label[data-baseweb="checkbox"] > span:first-child[data-checked="true"],
-label[data-baseweb="checkbox"] > span:first-child[data-checked="true"],
-[data-testid="stCheckbox"] label > span:first-child {
-    background-color: #9B7EBD !important;
-    border-color: #9B7EBD !important;
-}
-
-/* Force SVG visibility i checked state */
-[data-testid="stCheckbox"] label[aria-checked="true"] svg,
-[data-testid="stCheckbox"] input:checked ~ span svg,
-.stCheckbox svg polyline,
-.stCheckbox svg path {
-    stroke: white !important;
-    fill: white !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* --- HARD RESET AF CHECKBOX ALIGNMENT --- */
-
-/* 1. Tvangs-centrering af hele checkbox rækken */
-div[data-testid="stCheckbox"] label {
-    display: flex !important;
-    align-items: center !important;
-    min-height: 24px !important;
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
-}
-
-/* 2. Fjern marginer på tekst-containeren */
-div[data-testid="stCheckbox"] div[data-testid="stMarkdownContainer"] {
-    display: flex !important;
-    align-items: center !important;
-    line-height: 1 !important;
-}
-
-/* 3. DEN VIGTIGSTE: Håndtering af selve teksten (p-tagget) */
-div[data-testid="stCheckbox"] div[data-testid="stMarkdownContainer"] p {
-    margin-bottom: 0px !important;
-    margin-top: 0px !important;
+/* Tekst alignment */
+div[data-testid="stCheckbox"] div[data-tsestid="stMarkdownContainer"] p {
+    margin: 0 !important;
     padding: 0 !important;
     line-height: 1.2 !important;
-    position: relative !important;
-    top: 2px !important; /* Finjustering nedad */
 }
 
-/* 4. Sikrer at selve boksen (firkanten) ikke flyver rundt */
-div[data-testid="stCheckbox"] label span:first-child {
-    align-self: center !important;
-    margin-top: 0 !important;
-    position: relative !important;
-    top: 0px !important;
+/* ==========================================
+   CHECKBOX BOX - UNCHECKED (hvid)
+   ========================================== */
+label[data-baseweb="checkbox"][aria-checked="false"] > span:first-child {
+    background-color: white !important;
+    border-color: #D4BFFF !important;
 }
 
-/* ===========================================
-   CHECKBOX CHECKMARK FIX - AGGRESSIV
-   =========================================== */
-
-/* Sørg for at SVG polyline (fluebenet) er synligt og hvidt */
-[data-testid="stCheckbox"] svg,
-[data-baseweb="checkbox"] svg,
-.stCheckbox svg {
-    visibility: visible !important;
-    opacity: 1 !important;
+/* ==========================================
+   CHECKBOX BOX - CHECKED (lilla)
+   ========================================== */
+label[data-baseweb="checkbox"][aria-checked="true"] > span:first-child {
+    background-color: #9B7EBD !important;
+    border-color: #9B7EBD !important;
 }
 
-[data-testid="stCheckbox"] svg polyline,
-[data-baseweb="checkbox"] svg polyline,
-.stCheckbox svg polyline {
-    stroke: white !important;
-    stroke-width: 2 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
+/* ==========================================
+   SVG CHECKMARK - SYNLIGHED
+   ========================================== */
 
-/* Når checkbox er IKKE checked - skjul fluebenet */
-[data-testid="stCheckbox"] label[aria-checked="false"] svg,
-[data-baseweb="checkbox"][aria-checked="false"] svg {
+/* Skjul SVG når unchecked */
+label[data-baseweb="checkbox"][aria-checked="false"] svg {
     visibility: hidden !important;
     opacity: 0 !important;
 }
 
-/* Når checkbox ER checked - vis fluebenet */
-[data-testid="stCheckbox"] label[aria-checked="true"] svg,
-[data-baseweb="checkbox"][aria-checked="true"] svg {
+/* Vis SVG når checked */
+label[data-baseweb="checkbox"][aria-checked="true"] svg {
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-[data-testid="stCheckbox"] label[aria-checked="true"] svg polyline,
-[data-baseweb="checkbox"][aria-checked="true"] svg polyline {
+/* SVG checkmark farve (hvid) */
+label[data-baseweb="checkbox"] svg,
+label[data-baseweb="checkbox"] svg polyline,
+label[data-baseweb="checkbox"] svg path {
     stroke: white !important;
+    fill: none !important;
+    stroke-width: 2 !important;
 }
 
 /* ===========================================
