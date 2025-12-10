@@ -7,6 +7,10 @@ import datetime
 import time
 import os
 
+# Import tab modules
+from tab_newsletters import render_newsletters_tab
+from tab_subscribers import render_subscribers_tab
+
 # --- SIDE OPSAETNING ---
 st.set_page_config(
     page_title="CRM Dashboard", 
@@ -104,10 +108,6 @@ st.title("CRM Dashboard")
 
 # Tabs
 tab_newsletters, tab_subscribers = st.tabs(["Newsletters", "Subscribers"])
-
-# Import og render tabs
-from tab_newsletters import render_newsletters_tab
-from tab_subscribers import render_subscribers_tab
 
 with tab_newsletters:
     render_newsletters_tab()
