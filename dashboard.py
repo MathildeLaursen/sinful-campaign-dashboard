@@ -97,8 +97,9 @@ def check_password():
                     st.rerun()
     return False
 
-if not check_password():
-    st.stop()
+# MIDLERTIDIGT DEAKTIVERET - husk at aktivere igen!
+# if not check_password():
+#     st.stop()
 
 # --- HERUNDER STARTER DASHBOARDET ---
 
