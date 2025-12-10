@@ -114,8 +114,22 @@ st.title("Newsletter Dashboard")
 def load_google_sheet_data():
     """Henter data fra Google Sheet via gspread - INGEN cache"""
     try:
-        # Hent credentials fra Streamlit secrets
-        credentials_dict = st.secrets["gcp_service_account"]
+        # Hent credentials fra Streamlit secrets (samme struktur som streamlit-gsheets)
+        gsheets_config = st.secrets["connections"]["gsheets"]
+        
+        # Byg service account credentials dict
+        credentials_dict = {
+            "type": gsheets_config.get("type", "service_account"),
+            "project_id": gsheets_config["project_id"],
+            "private_key_id": gsheets_config["private_key_id"],
+            "private_key": gsheets_config["private_key"],
+            "client_email": gsheets_config["client_email"],
+            "client_id": gsheets_config["client_id"],
+            "auth_uri": gsheets_config.get("auth_uri", "https://accounts.google.com/o/oauth2/auth"),
+            "token_uri": gsheets_config.get("token_uri", "https://oauth2.googleapis.com/token"),
+            "auth_provider_x509_cert_url": gsheets_config.get("auth_provider_x509_cert_url", "https://www.googleapis.com/oauth2/v1/certs"),
+            "client_x509_cert_url": gsheets_config.get("client_x509_cert_url", "")
+        }
         
         # Opret credentials
         scopes = [
@@ -128,7 +142,7 @@ def load_google_sheet_data():
         gc = gspread.authorize(credentials)
         
         # Åbn spreadsheet via URL fra secrets
-        spreadsheet_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+        spreadsheet_url = gsheets_config["spreadsheet"]
         spreadsheet = gc.open_by_url(spreadsheet_url)
         
         # Hent første worksheet
