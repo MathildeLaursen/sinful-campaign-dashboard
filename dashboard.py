@@ -25,22 +25,37 @@ with open(css_path) as f:
 st.markdown("""
     <script>
         function fixCheckboxColors() {
-            document.querySelectorAll('label[data-baseweb="checkbox"] > span:first-child').forEach(span => {
-                if (span.style.borderColor) {
-                    span.style.borderColor = '#D4BFFF';
+            document.querySelectorAll('label[data-baseweb="checkbox"]').forEach(label => {
+                const span = label.querySelector('span:first-child');
+                const isChecked = label.getAttribute('aria-checked') === 'true';
+                const svg = span ? span.querySelector('svg') : null;
+                
+                if (span) {
+                    if (isChecked) {
+                        span.style.backgroundColor = '#9B7EBD';
+                        span.style.borderColor = '#9B7EBD';
+                    } else {
+                        span.style.backgroundColor = 'white';
+                        span.style.borderColor = '#D4BFFF';
+                    }
                 }
-                const input = span.parentElement.querySelector('input[type="checkbox"]');
-                if (input && input.checked) {
-                    span.style.backgroundColor = '#9B7EBD';
-                    span.style.borderColor = '#9B7EBD';
-                } else {
-                    span.style.backgroundColor = 'white';
-                    span.style.borderColor = '#D4BFFF';
+                
+                // Fix SVG checkmark visibility
+                if (svg) {
+                    const polyline = svg.querySelector('polyline');
+                    if (polyline) {
+                        polyline.style.stroke = 'white';
+                        polyline.style.strokeWidth = '2';
+                    }
+                    svg.style.visibility = isChecked ? 'visible' : 'hidden';
+                    svg.style.opacity = isChecked ? '1' : '0';
                 }
             });
         }
         
         setTimeout(fixCheckboxColors, 100);
+        setTimeout(fixCheckboxColors, 500);
+        setTimeout(fixCheckboxColors, 1000);
         
         const observer = new MutationObserver(fixCheckboxColors);
         observer.observe(document.body, { childList: true, subtree: true, attributes: true });
