@@ -31,34 +31,37 @@ st.markdown("""
                 const svg = span ? span.querySelector('svg') : null;
                 
                 if (span) {
-                    if (isChecked) {
-                        span.style.backgroundColor = '#9B7EBD';
-                        span.style.borderColor = '#9B7EBD';
-                    } else {
-                        span.style.backgroundColor = 'white';
-                        span.style.borderColor = '#D4BFFF';
-                    }
+                    // Sæt baggrund og border baseret på checked state
+                    span.style.setProperty('background-color', isChecked ? '#9B7EBD' : 'white', 'important');
+                    span.style.setProperty('border-color', isChecked ? '#9B7EBD' : '#D4BFFF', 'important');
                 }
                 
                 // Fix SVG checkmark visibility
                 if (svg) {
+                    svg.style.setProperty('visibility', isChecked ? 'visible' : 'hidden', 'important');
+                    svg.style.setProperty('opacity', isChecked ? '1' : '0', 'important');
+                    
+                    // Style polyline (fluebenet)
                     const polyline = svg.querySelector('polyline');
                     if (polyline) {
-                        polyline.style.stroke = 'white';
-                        polyline.style.strokeWidth = '2';
+                        polyline.style.setProperty('stroke', 'white', 'important');
+                        polyline.style.setProperty('stroke-width', '2', 'important');
                     }
-                    svg.style.visibility = isChecked ? 'visible' : 'hidden';
-                    svg.style.opacity = isChecked ? '1' : '0';
                 }
             });
         }
         
+        // Kør flere gange for at fange dynamisk indhold
         setTimeout(fixCheckboxColors, 100);
-        setTimeout(fixCheckboxColors, 500);
+        setTimeout(fixCheckboxColors, 300);
+        setTimeout(fixCheckboxColors, 600);
         setTimeout(fixCheckboxColors, 1000);
         
-        const observer = new MutationObserver(fixCheckboxColors);
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        // Observer for at fange ændringer
+        const observer = new MutationObserver(() => {
+            setTimeout(fixCheckboxColors, 50);
+        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-checked'] });
     </script>
 """, unsafe_allow_html=True)
 
