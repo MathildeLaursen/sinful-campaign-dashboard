@@ -480,12 +480,9 @@ with col_email:
             st.session_state.cb_reset_email += 1
             st.rerun()
 
-# Ignorer A/B checkbox - wrapped i container for bedre alignment
+# Ignorer A/B checkbox
 with col_ab:
-    # Wrapper for at matche højden på popover-knapper
-    st.markdown('<div class="checkbox-align-wrapper">', unsafe_allow_html=True)
     ignore_ab = st.checkbox("Ignorer A/B", value=st.session_state.ignore_ab, key="ignore_ab_cb")
-    st.markdown('</div>', unsafe_allow_html=True)
     if ignore_ab != st.session_state.ignore_ab:
         st.session_state.ignore_ab = ignore_ab
         st.session_state.selected_emails = None  # Reset email filter
