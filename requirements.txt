@@ -1,5 +1,8 @@
 streamlit
 pandas
 plotly
-st-gsheets-connection
+streamlit-gsheets
 extra-streamlit-components
+gspread
+google-auth
+
