@@ -137,6 +137,7 @@ button[data-testid="stPopoverButton"] {
     justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
+    min-height: 42px !important;
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(250,245,255,0.95) 100%) !important;
     border: 1px solid #D4BFFF !important;
     border-radius: 10px !important;
@@ -288,30 +289,34 @@ label[data-baseweb="checkbox"] svg path {
 }
 
 /* ===========================================
-   IGNORER A/B CHECKBOX - BUTTON STYLE
+   IGNORER A/B CHECKBOX - MATCHER POPOVER BUTTONS
    =========================================== */
 
-/* Style checkboxen som en knap der matcher popover buttons */
-div[data-testid="stCheckbox"]:has(label[aria-label*="Ignorer"]),
-div[data-testid="stCheckbox"]:last-of-type {
+/* Container alignment */
+div[data-testid="stCheckbox"] {
     display: flex !important;
     align-items: center !important;
+    height: 100% !important;
 }
 
-div[data-testid="stCheckbox"]:has(label[aria-label*="Ignorer"]) label,
-div[data-testid="stCheckbox"]:last-of-type label {
+/* Style checkboxen som en knap der matcher popover buttons */
+div[data-testid="stCheckbox"] > label[data-baseweb="checkbox"] {
     background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(250,245,255,0.95) 100%) !important;
     border: 1px solid #D4BFFF !important;
     border-radius: 10px !important;
-    padding: 0.4rem 0.8rem !important;
+    padding: 0.5rem 1rem !important;
+    min-height: 42px !important;
     white-space: nowrap !important;
     transition: all 0.3s ease !important;
+    width: 100% !important;
+    justify-content: center !important;
 }
 
-div[data-testid="stCheckbox"]:has(label[aria-label*="Ignorer"]) label:hover,
-div[data-testid="stCheckbox"]:last-of-type label:hover {
+div[data-testid="stCheckbox"] > label[data-baseweb="checkbox"]:hover {
     border-color: #9B7EBD !important;
     background: linear-gradient(135deg, rgba(212,191,255,0.2) 0%, rgba(232,180,203,0.2) 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(155, 126, 189, 0.15) !important;
 }
 
 /* ===========================================
