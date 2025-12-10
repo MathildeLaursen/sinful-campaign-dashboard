@@ -2,21 +2,21 @@
 CRM Dashboard - Hovedscript
 """
 import streamlit as st
-import extra_streamlit_components as stx
-import datetime
-import time
-import os
 
-# Import tab modules
-from tab_newsletters import render_newsletters_tab
-from tab_subscribers import render_subscribers_tab
-
-# --- SIDE OPSAETNING ---
+# --- SIDE OPSAETNING (SKAL VAERE FOERST!) ---
 st.set_page_config(
     page_title="CRM Dashboard", 
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
+
+# Nu kan vi importere resten
+import extra_streamlit_components as stx
+import datetime
+import time
+import os
+from tab_newsletters import render_newsletters_tab
+from tab_subscribers import render_subscribers_tab
 
 # --- CSS TEMA ---
 css_path = os.path.join(os.path.dirname(__file__), 'style.css')
