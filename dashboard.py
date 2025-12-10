@@ -701,7 +701,7 @@ if not current_df.empty:
     fig.update_layout(
         title="",
         showlegend=True,
-        height=350,
+        height=455,
         margin=dict(l=50, r=50, t=50, b=80),
         legend=dict(
             orientation="h",
