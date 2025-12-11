@@ -8,10 +8,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from shared import get_gspread_client, show_metric
 
-# Flows Sheet ID
-FLOWS_SHEET_ID = "1Q8jNKdnvmHzPdPvxF1vJMQqMqMqMqMqMqMqMqMqMqMq"  # Skal opdateres
-
-
 def col_letter_to_index(col_str):
     """Konverter kolonnebogstav til 0-baseret indeks (A=0, B=1, ..., Z=25, AA=26, ...)"""
     result = 0
@@ -24,12 +20,14 @@ def load_flows_data():
     """Henter Flows data fra Google Sheet"""
     try:
         gc = get_gspread_client()
-        # Brug flows sheet URL fra secrets eller hardcoded ID
-        if "flows_spreadsheet" in st.secrets["connections"]["gsheets"]:
-            spreadsheet_url = st.secrets["connections"]["gsheets"]["flows_spreadsheet"]
-            spreadsheet = gc.open_by_url(spreadsheet_url)
-        else:
-            spreadsheet = gc.open_by_key(FLOWS_SHEET_ID)
+        
+        # Tjek om flows_spreadsheet er konfigureret
+        if "flows_spreadsheet" not in st.secrets["connections"]["gsheets"]:
+            st.error("⚠️ Mangler 'flows_spreadsheet' i secrets. Tilføj: flows_spreadsheet = 'URL'")
+            return pd.DataFrame()
+        
+        flows_url = st.secrets["connections"]["gsheets"]["flows_spreadsheet"]
+        spreadsheet = gc.open_by_url(flows_url)
         
         worksheet = spreadsheet.sheet1
         all_values = worksheet.get_all_values()
