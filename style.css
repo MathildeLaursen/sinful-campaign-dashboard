@@ -374,16 +374,9 @@ label[data-baseweb="checkbox"] svg path {
    KALENDER - Simpel styling
    =========================================== */
 
-/* Skjul "Choose a date range" dropdown i kalenderen */
-[data-baseweb="form-control-label"],
-.stDateInput [data-baseweb="select"],
-.stDateInput label[data-baseweb="form-control-label"],
-div:has(> [data-baseweb="calendar"]) ~ div,
-/* Skjul hele form-control containeren med dropdown */
-[data-baseweb="form-control-container"],
-div:has(> [data-baseweb="form-control-container"]),
-.st-hq,
-.st-hr {
+/* Skjul "Choose a date range" dropdown KUN i kalenderen */
+.stDateInput [data-baseweb="form-control-label"],
+.stDateInput [data-baseweb="select"]:not([aria-label]) {
     display: none !important;
 }
 
