@@ -157,10 +157,18 @@ def aggregate_to_flow_level(df):
 def render_flows_tab():
     """Render Flows tab indhold"""
     
+    # DEBUG: Vis secrets status
+    try:
+        flows_url = st.secrets["connections"]["gsheets"].get("flows_spreadsheet", "IKKE SAT")
+        st.info(f"🔧 DEBUG: flows_spreadsheet = {flows_url[:50]}..." if len(flows_url) > 50 else f"🔧 DEBUG: flows_spreadsheet = {flows_url}")
+    except Exception as e:
+        st.error(f"🔧 DEBUG: Kan ikke læse secrets: {e}")
+    
     # Load data
     try:
         with st.spinner('Henter flow data...'):
             df = load_flows_data()
+        st.info(f"🔧 DEBUG: DataFrame shape = {df.shape if not df.empty else 'TOM'}")
         if df.empty:
             st.error("Kunne ikke hente flow data. Tjek Google Sheets konfiguration.")
             return
