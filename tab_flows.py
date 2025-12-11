@@ -27,16 +27,21 @@ def load_flows_data():
             return pd.DataFrame()
         
         flows_url = st.secrets["connections"]["gsheets"]["flows_spreadsheet"]
+        st.info(f"🔧 DEBUG load: Åbner spreadsheet...")
         spreadsheet = gc.open_by_url(flows_url)
         
         worksheet = spreadsheet.sheet1
+        st.info(f"🔧 DEBUG load: Henter data fra sheet: {worksheet.title}")
         all_values = worksheet.get_all_values()
+        st.info(f"🔧 DEBUG load: Fik {len(all_values)} rækker fra sheet")
         
         if len(all_values) > 2:
             # Skip header rows (row 1-2 contains headers)
             data = all_values[2:]
             raw_df = pd.DataFrame(data)
+            st.info(f"🔧 DEBUG load: raw_df shape = {raw_df.shape}, kolonner = {len(raw_df.columns)}")
         else:
+            st.warning(f"🔧 DEBUG load: Kun {len(all_values)} rækker - for få til at parse")
             return pd.DataFrame()
             
     except Exception as e:
