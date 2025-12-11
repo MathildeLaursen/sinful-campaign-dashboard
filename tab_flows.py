@@ -40,7 +40,8 @@ def load_flows_data():
             return pd.DataFrame()
             
     except Exception as e:
-        st.error(f"Fejl ved indlæsning fra Google Sheets: {e}")
+        st.error(f"Fejl ved indlæsning fra Google Sheets: {type(e).__name__}: {e}")
+        st.info(f"URL brugt: {st.secrets['connections']['gsheets'].get('flows_spreadsheet', 'IKKE SAT')}")
         return pd.DataFrame()
     
     # Landekonfiguration med startkolonner (0-indexed)
