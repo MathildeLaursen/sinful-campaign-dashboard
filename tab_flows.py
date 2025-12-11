@@ -30,7 +30,7 @@ def load_flows_data():
         st.info(f"🔧 DEBUG load: Åbner spreadsheet...")
         spreadsheet = gc.open_by_url(flows_url)
         
-        worksheet = spreadsheet.sheet1
+        worksheet = spreadsheet.worksheet("All_Flow")
         st.info(f"🔧 DEBUG load: Henter data fra sheet: {worksheet.title}")
         all_values = worksheet.get_all_values()
         st.info(f"🔧 DEBUG load: Fik {len(all_values)} rækker fra sheet")
